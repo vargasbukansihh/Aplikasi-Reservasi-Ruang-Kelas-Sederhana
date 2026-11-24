@@ -7,15 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/base.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../assets/css/jadwal-mahasiswa.css" rel="stylesheet">
 </head>
 <body>
   <div class="app-shell d-flex">
     <aside class="app-sidebar d-flex flex-column gap-1">
-      <a class="brand" href="dasboard.html">
+      <a class="brand" href="dasboard.php">
         <img class="brand-mark brand-logo" src="../assets/img/logo pbl.png" alt="" aria-hidden="true">
         Reservasi Kelas
       </a>
@@ -23,17 +23,17 @@
       <nav aria-labelledby="judul-menu">
         <ul class="nav flex-column gap-1">
           <li class="nav-item">
-            <a class="nav-link" href="dasboard.html">
+            <a class="nav-link" href="dasboard.php">
               <i class="fa-solid fa-gauge" aria-hidden="true"></i>Dashboard
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="jadwal.html" aria-current="page">
+            <a class="nav-link active" href="jadwal.php" aria-current="page">
               <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="reservasi.html">
+            <a class="nav-link" href="reservasi.php">
               <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
@@ -45,7 +45,7 @@
       <header class="app-header">
         <nav aria-label="Breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dasboard.html">Mahasiswa</a></li>
+            <li class="breadcrumb-item"><a href="dasboard.php">Mahasiswa</a></li>
             <li class="breadcrumb-item active" aria-current="page">Jadwal</li>
           </ol>
         </nav>
@@ -61,7 +61,7 @@
             <h1 class="page-title">Jadwal &amp; Ketersediaan Ruang</h1>
             <p class="page-subtitle">Cari ruang dan jadwal berdasarkan tanggal, nama ruang, dan status ketersediaan</p>
           </div>
-          <a class="btn btn-primary" href="reservasi.html">
+          <a class="btn btn-primary" href="reservasi.php">
             <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Ajukan Reservasi
           </a>
         </div>

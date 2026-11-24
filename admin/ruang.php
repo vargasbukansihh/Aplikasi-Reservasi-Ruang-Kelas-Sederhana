@@ -7,15 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/base.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../assets/css/ruang.css" rel="stylesheet">
 </head>
 <body>
   <div class="app-shell d-flex">
     <aside class="app-sidebar d-flex flex-column gap-1">
-      <a class="brand" href="dasboard.html">
+      <a class="brand" href="dasboard1.php">
         <img class="brand-mark brand-logo" src="../assets/img/logo pbl.png" alt="" aria-hidden="true">
         Reservasi Kelas
       </a>
@@ -23,32 +23,32 @@
       <nav aria-labelledby="judul-menu">
         <ul class="nav flex-column gap-1">
           <li class="nav-item">
-            <a class="nav-link" href="dasboard1.html">
+            <a class="nav-link" href="dasboard1.php">
               <i class="fa-solid fa-gauge" aria-hidden="true"></i>Dashboard
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="ruang.html" aria-current="page">
+            <a class="nav-link active" href="ruang.php" aria-current="page">
               <i class="fa-solid fa-building" aria-hidden="true"></i>Ruang
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="data_pengguna.html">
+            <a class="nav-link" href="data_pengguna.php">
               <i class="fa-solid fa-users" aria-hidden="true"></i>Pengguna
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="reservasi.html">
+            <a class="nav-link" href="reservasi.php">
               <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="jadwal.html">
+            <a class="nav-link" href="jadwal.php">
               <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="rekapitulasi.html">
+            <a class="nav-link" href="rekapitulasi.php">
               <i class="fa-solid fa-chart-column" aria-hidden="true"></i>Laporan
             </a>
           </li>
@@ -68,7 +68,7 @@
       <header class="app-header">
         <nav aria-label="Breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dasboard.html">Admin</a></li>
+            <li class="breadcrumb-item"><a href="dasboard1.php">Admin</a></li>
             <li class="breadcrumb-item active" aria-current="page">Ruang</li>
           </ol>
         </nav>
@@ -85,7 +85,7 @@
             <p class="page-subtitle">Kelola master data ruang kelas</p>
           </div>
           <button type="button" class="btn btn-primary" id="btn-tambah-ruang"
-                  data-bs-toggle="modal" data-bs-target="#modal-ruang">
+                  data-modal-target="#modal-ruang">
             <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Tambah Ruang
           </button>
         </div>
@@ -156,7 +156,7 @@
           <input type="hidden" name="id" id="field-id-ruang">
           <div class="modal-header">
             <h2 class="modal-title" id="judul-modal-ruang">Tambah Ruang</h2>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            <button type="button" class="btn-close" data-modal-dismiss aria-label="Tutup"></button>
           </div>
           <div class="modal-body">
             <div>
@@ -183,7 +183,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-outline-secondary" data-modal-dismiss>Batal</button>
             <button type="submit" class="btn btn-primary" id="btn-simpan-ruang">Simpan</button>
           </div>
         </form>
@@ -198,7 +198,7 @@
           <input type="hidden" name="id" id="hapus-id-ruang">
           <div class="modal-header">
             <h2 class="modal-title" id="judul-modal-hapus-ruang">Hapus Ruang</h2>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            <button type="button" class="btn-close" data-modal-dismiss aria-label="Tutup"></button>
           </div>
           <div class="modal-body">
             <p class="mb-0">Anda yakin ingin menghapus ruang berikut?</p>
@@ -206,7 +206,7 @@
             <p class="confirm-warning">Tindakan ini tidak dapat dibatalkan.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-outline-secondary" data-modal-dismiss>Batal</button>
             <button type="submit" class="btn btn-danger">Hapus</button>
           </div>
         </form>
@@ -214,7 +214,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/modal.js"></script>
   <script src="../assets/js/ruang.js"></script>
 </body>
 </html>

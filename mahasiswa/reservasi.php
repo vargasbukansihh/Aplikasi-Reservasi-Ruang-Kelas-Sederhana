@@ -7,15 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/base.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../assets/css/reservasi-mahasiswa.css" rel="stylesheet">
 </head>
 <body>
   <div class="app-shell d-flex">
     <aside class="app-sidebar d-flex flex-column gap-1">
-      <a class="brand" href="dasboard.html">
+      <a class="brand" href="dasboard.php">
         <img class="brand-mark brand-logo" src="../assets/img/logo pbl.png" alt="" aria-hidden="true">
         Reservasi Kelas
       </a>
@@ -23,17 +23,17 @@
       <nav aria-labelledby="judul-menu">
         <ul class="nav flex-column gap-1">
           <li class="nav-item">
-            <a class="nav-link" href="dasboard.html">
+            <a class="nav-link" href="dasboard.php">
               <i class="fa-solid fa-gauge" aria-hidden="true"></i>Dashboard
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="jadwal.html">
+            <a class="nav-link" href="jadwal.php">
               <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="reservasi.html" aria-current="page">
+            <a class="nav-link active" href="reservasi.php" aria-current="page">
               <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
@@ -45,7 +45,7 @@
       <header class="app-header">
         <nav aria-label="Breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dasboard.html">Mahasiswa</a></li>
+            <li class="breadcrumb-item"><a href="dasboard.php">Mahasiswa</a></li>
             <li class="breadcrumb-item active" aria-current="page">Reservasi</li>
           </ol>
         </nav>
@@ -63,7 +63,7 @@
             <p class="page-subtitle">Riwayat dan status pengajuan reservasi Anda</p>
           </div>
           <button type="button" class="btn btn-primary" id="btn-ajukan-reservasi"
-                  data-bs-toggle="modal" data-bs-target="#modal-reservasi">
+                  data-modal-target="#modal-reservasi">
             <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Ajukan Reservasi
           </button>
         </div>
@@ -101,7 +101,7 @@
         <form id="form-reservasi" novalidate>
           <div class="modal-header">
             <h2 class="modal-title" id="judul-modal-reservasi">Ajukan Reservasi</h2>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            <button type="button" class="btn-close" data-modal-dismiss aria-label="Tutup"></button>
           </div>
           <div class="modal-body">
             <div>
@@ -148,7 +148,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-outline-secondary" data-modal-dismiss>Batal</button>
             <button type="submit" class="btn btn-primary">Ajukan Reservasi</button>
           </div>
         </form>
@@ -163,7 +163,7 @@
         <form id="form-batalkan-reservasi">
           <div class="modal-header">
             <h2 class="modal-title" id="judul-modal-batalkan-reservasi">Batalkan Reservasi</h2>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            <button type="button" class="btn-close" data-modal-dismiss aria-label="Tutup"></button>
           </div>
           <div class="modal-body">
             <p class="mb-0">Anda yakin ingin membatalkan reservasi berikut?</p>
@@ -171,7 +171,7 @@
             <p class="reservation-cancel-note">Status reservasi akan berubah menjadi Batal.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kembali</button>
+            <button type="button" class="btn btn-outline-secondary" data-modal-dismiss>Kembali</button>
             <button type="submit" class="btn btn-primary">Ya, Batalkan</button>
           </div>
         </form>
@@ -179,7 +179,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/modal.js"></script>
   <script src="../assets/js/reservasi-mahasiswa.js"></script>
 </body>
 </html>

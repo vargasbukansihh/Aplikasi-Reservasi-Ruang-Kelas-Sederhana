@@ -33,7 +33,7 @@
     var ikon = { success: 'fa-circle-check', info: 'fa-circle-info', danger: 'fa-circle-exclamation' }[tipe];
     area.textContent = '';
     var el = document.createElement('div');
-    el.className = 'alert alert-' + tipe + ' alert-feedback alert-dismissible fade show';
+    el.className = 'alert alert-' + tipe + ' alert-feedback alert-dismissible';
     el.setAttribute('role', 'status');
     var i = document.createElement('i');
     i.className = 'fa-solid ' + ikon + ' me-2';
@@ -43,7 +43,7 @@
     var tutup = document.createElement('button');
     tutup.type = 'button';
     tutup.className = 'btn-close';
-    tutup.setAttribute('data-bs-dismiss', 'alert');
+    tutup.setAttribute('data-alert-dismiss', '');
     tutup.setAttribute('aria-label', 'Tutup notifikasi');
     el.appendChild(tutup);
     area.appendChild(el);
@@ -169,23 +169,23 @@
 
     if (ubah) {
       modeUbah(ubah.dataset);
-      bootstrap.Modal.getOrCreateInstance(modalPengguna).show();
+      window.AppModal.show(modalPengguna, ubah);
     }
 
     if (hapus) {
       hapusId.value = hapus.dataset.id || '';
       hapusRingkasan.textContent = [hapus.dataset.nama, hapus.dataset.identitas, hapus.dataset.peran]
         .filter(Boolean).join('  ·  ');
-      bootstrap.Modal.getOrCreateInstance(modalHapus).show();
+      window.AppModal.show(modalHapus, hapus);
     }
   });
 
-  modalPengguna.addEventListener('shown.bs.modal', function () { fields.nama.focus(); });
+  modalPengguna.addEventListener('modal:shown', function () { fields.nama.focus(); });
 
   /* Notifikasi lama dibersihkan saat modal dibuka/ditutup agar tidak basi */
   [modalPengguna, modalHapus].forEach(function (m) {
-    m.addEventListener('show.bs.modal', function () { area.textContent = ''; });
-    m.addEventListener('hidden.bs.modal', function () { area.textContent = ''; });
+    m.addEventListener('modal:show', function () { area.textContent = ''; });
+    m.addEventListener('modal:hidden', function () { area.textContent = ''; });
   });
 
   formHapus.addEventListener('submit', function (e) {

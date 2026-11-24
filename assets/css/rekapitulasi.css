@@ -129,16 +129,16 @@
 }
 
 .report-table {
+  width: 100%;
   min-width: 430px;
   margin: 0;
   font-size: 11px;
   line-height: 16px;
-  --bs-table-bg: transparent;
 }
 
 .report-table > :not(caption) > * > * {
   padding: 7px 8px;
-  border-bottom-color: var(--border-default);
+  border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
 }
 

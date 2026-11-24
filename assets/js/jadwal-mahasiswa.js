@@ -103,7 +103,7 @@
           tanggal: item.date,
           jam: item.time
         });
-        action.href = 'reservasi.html?' + params.toString();
+        action.href = 'reservasi.php?' + params.toString();
         action.setAttribute('aria-label', 'Ajukan reservasi ' + item.room + ' tanggal ' +
           displayDate(item.date) + ' pukul ' + item.time);
       } else {

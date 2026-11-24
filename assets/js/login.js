@@ -51,7 +51,7 @@
       return;
     }
 
-    window.location.href = 'admin/dasboard.html';
+    window.location.href = 'admin/dasboard1.php';
   });
 
   document.getElementById('lupa-password').addEventListener('click', function () {

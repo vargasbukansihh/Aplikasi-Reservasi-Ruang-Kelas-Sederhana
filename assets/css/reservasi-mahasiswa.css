@@ -19,16 +19,16 @@
 }
 
 .reservations-table {
+  width: 100%;
   min-width: 760px;
   margin: 0;
   font-size: 13px;
   line-height: 20px;
-  --bs-table-bg: transparent;
 }
 
 .reservations-table > :not(caption) > * > * {
   padding: 10px 12px;
-  border-bottom-color: var(--border-default);
+  border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
 }
 

@@ -166,7 +166,7 @@
     });
     renderReservations();
     form.reset();
-    bootstrap.Modal.getOrCreateInstance(modalForm).hide();
+    window.AppModal.hide(modalForm);
     document.getElementById('area-notifikasi-reservasi').innerHTML =
       '<div class="alert alert-success alert-feedback" role="status">' +
       '<i class="fa-solid fa-circle-check me-2" aria-hidden="true"></i>' +
@@ -206,9 +206,10 @@
     cancelId = reservation.id;
     cancelSummary.textContent = reservation.room + '  ·  ' +
       formatDate(reservation.date) + ', ' + timeRange(reservation);
-    bootstrap.Modal.getOrCreateInstance(
-      document.getElementById('modal-batalkan-reservasi')
-    ).show();
+    window.AppModal.show(
+      document.getElementById('modal-batalkan-reservasi'),
+      button
+    );
   });
 
   cancelForm.addEventListener('submit', function (event) {
@@ -221,18 +222,16 @@
     }
     reservation.status = 'Batal';
     renderReservations();
-    bootstrap.Modal.getOrCreateInstance(
-      document.getElementById('modal-batalkan-reservasi')
-    ).hide();
+    window.AppModal.hide(document.getElementById('modal-batalkan-reservasi'));
   });
 
-  modalForm.addEventListener('shown.bs.modal', function () {
+  modalForm.addEventListener('modal:shown', function () {
     roomField.focus();
   });
-  modalForm.addEventListener('hidden.bs.modal', clearFormValidation);
+  modalForm.addEventListener('modal:hidden', clearFormValidation);
 
   renderReservations();
   if (parseQueryParameters()) {
-    bootstrap.Modal.getOrCreateInstance(modalForm).show();
+    window.AppModal.show(modalForm, document.getElementById('btn-ajukan-reservasi'));
   }
 })();

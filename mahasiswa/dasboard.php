@@ -3,78 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard - Reservasi Kelas</title>
+  <title>Dashboard Mahasiswa - Reservasi Kelas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/base.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../assets/css/dashboard.css" rel="stylesheet">
 </head>
 <body>
   <div class="app-shell d-flex">
     <aside class="app-sidebar d-flex flex-column gap-1">
-      <a class="brand" href="dasboard.html">
+      <a class="brand" href="dasboard.php">
         <img class="brand-mark brand-logo" src="../assets/img/logo pbl.png" alt="" aria-hidden="true">
         Reservasi Kelas
       </a>
-      <p class="nav-heading" id="judul-menu">Menu Admin / Petugas</p>
+      <p class="nav-heading" id="judul-menu">Menu Mahasiswa</p>
       <nav aria-labelledby="judul-menu">
         <ul class="nav flex-column gap-1">
           <li class="nav-item">
-            <a class="nav-link active" href="dasboard.html" aria-current="page">
+            <a class="nav-link active" href="dasboard.php" aria-current="page">
               <i class="fa-solid fa-gauge" aria-hidden="true"></i>Dashboard
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="ruang.html">
-              <i class="fa-solid fa-building" aria-hidden="true"></i>Ruang
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="data_pengguna.html">
-              <i class="fa-solid fa-users" aria-hidden="true"></i>Pengguna
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="reservasi.html">
-              <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="jadwal.html">
+            <a class="nav-link" href="jadwal.php">
               <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="rekapitulasi.html">
-              <i class="fa-solid fa-chart-column" aria-hidden="true"></i>Laporan
+            <a class="nav-link" href="reservasi.php">
+              <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
         </ul>
       </nav>
-      <div class="flex-grow-1 sidebar-spacer"></div>
-      <div class="sidebar-user">
-        <span class="avatar" aria-hidden="true"></span>
-        <div>
-          <div class="user-name">Admin Kampus</div>
-          <div class="user-role">Admin</div>
-        </div>
-      </div>
     </aside>
 
     <div class="app-main flex-grow-1">
       <header class="app-header">
         <nav aria-label="Breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dasboard.html">Admin</a></li>
+            <li class="breadcrumb-item"><a href="dasboard.php">Mahasiswa</a></li>
             <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
           </ol>
         </nav>
         <div class="user-chip">
           <span class="avatar avatar-sm" aria-hidden="true"></span>
-          Admin Kampus
+          Budi Santoso
         </div>
       </header>
 
@@ -84,7 +61,7 @@
             <h1 class="page-title">Dashboard</h1>
             <p class="page-subtitle">Ringkasan ruang dan reservasi hari ini</p>
           </div>
-          <a class="btn btn-primary" href="reservasi.html">
+          <a class="btn btn-primary" href="reservasi.php">
             <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Reservasi Baru
           </a>
         </div>

@@ -45,13 +45,13 @@
     var closeButton = document.createElement('button');
 
     noticeArea.textContent = '';
-    alert.className = 'alert alert-' + type + ' alert-feedback alert-dismissible fade show';
+    alert.className = 'alert alert-' + type + ' alert-feedback alert-dismissible';
     alert.setAttribute('role', 'status');
     icon.className = 'fa-solid ' + iconNames[type] + ' me-2';
     icon.setAttribute('aria-hidden', 'true');
     closeButton.type = 'button';
     closeButton.className = 'btn-close';
-    closeButton.setAttribute('data-bs-dismiss', 'alert');
+    closeButton.setAttribute('data-alert-dismiss', '');
     closeButton.setAttribute('aria-label', 'Tutup notifikasi');
 
     alert.appendChild(icon);
@@ -245,7 +245,7 @@
     locationField.value = room.lokasi;
     activeField.checked = room.status === 'aktif';
     clearValidation();
-    bootstrap.Modal.getOrCreateInstance(roomModal).show();
+    window.AppModal.show(roomModal, tbody.querySelector('.btn-ubah[data-id="' + room.id + '"]'));
   }
 
   function getRoom(id) {
@@ -301,7 +301,7 @@
         deleteId.value = roomToDelete.id;
         deleteSummary.textContent = roomToDelete.nama + '  ·  Kapasitas ' +
           roomToDelete.kapasitas + '  ·  ' + roomToDelete.lokasi;
-        bootstrap.Modal.getOrCreateInstance(deleteModal).show();
+        window.AppModal.show(deleteModal, deleteButton);
       }
     }
   });
@@ -330,7 +330,7 @@
     }
 
     renderRows();
-    bootstrap.Modal.getOrCreateInstance(roomModal).hide();
+    window.AppModal.hide(roomModal);
     showNotice('success', isEditing
       ? 'Perubahan ruang diperbarui sementara di halaman ini; data belum tersimpan ke database.'
       : 'Ruang ditambahkan sementara di halaman ini; data belum tersimpan ke database.');
@@ -347,7 +347,7 @@
     });
     deleteId.value = '';
     renderRows();
-    bootstrap.Modal.getOrCreateInstance(deleteModal).hide();
+    window.AppModal.hide(deleteModal);
     showNotice('success', 'Ruang dihapus dari tampilan sementara; perubahan belum disimpan ke database.');
   });
 
@@ -360,13 +360,13 @@
     });
   });
 
-  roomModal.addEventListener('shown.bs.modal', function () {
+  roomModal.addEventListener('modal:shown', function () {
     nameField.focus();
   });
 
-  roomModal.addEventListener('hidden.bs.modal', resetForm);
+  roomModal.addEventListener('modal:hidden', resetForm);
   [roomModal, deleteModal].forEach(function (modal) {
-    modal.addEventListener('show.bs.modal', function () {
+    modal.addEventListener('modal:show', function () {
       noticeArea.textContent = '';
     });
   });

@@ -50,16 +50,16 @@
 }
 
 .schedule-table {
+  width: 100%;
   min-width: 850px;
   margin: 0;
   font-size: 13px;
   line-height: 20px;
-  --bs-table-bg: transparent;
 }
 
 .schedule-table > :not(caption) > * > * {
   padding: 10px 12px;
-  border-bottom-color: var(--border-default);
+  border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
 }
 
@@ -159,7 +159,6 @@
   }
 
   .pagination {
-    --bs-pagination-padding-x: 12px;
-    --bs-pagination-padding-y: 7px;
+    font-size: 12px;
   }
 }
