@@ -33,8 +33,6 @@
   });
 
   form.addEventListener('submit', function (event) {
-    event.preventDefault();
-
     var firstInvalid = null;
     [identity, password].forEach(function (field) {
       var value = field.value.trim();
@@ -47,11 +45,9 @@
     });
 
     if (firstInvalid) {
+      event.preventDefault();
       firstInvalid.focus();
-      return;
     }
-
-    window.location.href = 'admin/dasboard1.php';
   });
 
   document.getElementById('lupa-password').addEventListener('click', function () {

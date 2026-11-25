@@ -1,14 +1,7 @@
 (function () {
   'use strict';
 
-  var rooms = [
-    { id: '1', nama: 'Ruang A101', kapasitas: 40, lokasi: 'Gedung A Lt.1', status: 'aktif' },
-    { id: '2', nama: 'Ruang A102', kapasitas: 35, lokasi: 'Gedung A Lt.1', status: 'aktif' },
-    { id: '3', nama: 'Lab Komputer 1', kapasitas: 30, lokasi: 'Gedung B Lt.2', status: 'aktif' },
-    { id: '4', nama: 'Ruang B202', kapasitas: 50, lokasi: 'Gedung B Lt.2', status: 'aktif' },
-    { id: '5', nama: 'Aula Mini', kapasitas: 120, lokasi: 'Gedung C Lt.1', status: 'aktif' },
-    { id: '6', nama: 'Ruang C301', kapasitas: 25, lokasi: 'Gedung C Lt.3', status: 'nonaktif' }
-  ];
+  var rooms = window.roomData;
   var pageSize = 5;
   var currentPage = 1;
 
@@ -32,7 +25,6 @@
   var deleteForm = document.getElementById('form-hapus-ruang');
   var deleteId = document.getElementById('hapus-id-ruang');
   var deleteSummary = document.getElementById('hapus-ringkasan-ruang');
-  var nextId = 7;
 
   function showNotice(type, message) {
     var iconNames = {
@@ -225,6 +217,7 @@
 
   function resetForm() {
     roomForm.reset();
+    roomForm.action = '../db/tambah_ruang.php';
     roomId.value = '';
     activeField.checked = true;
     clearValidation();
@@ -237,6 +230,7 @@
   }
 
   function openEditModal(room) {
+    roomForm.action = '../db/edit_ruang.php';
     roomTitle.textContent = 'Ubah Ruang';
     saveButton.textContent = 'Simpan Perubahan';
     roomId.value = room.id;
@@ -307,48 +301,15 @@
   });
 
   roomForm.addEventListener('submit', function (event) {
-    event.preventDefault();
     if (!validateForm()) {
-      return;
+      event.preventDefault();
     }
-
-    var isEditing = Boolean(roomId.value);
-    var updatedRoom = {
-      id: isEditing ? roomId.value : String(nextId++),
-      nama: nameField.value,
-      kapasitas: Number(capacityField.value),
-      lokasi: locationField.value,
-      status: activeField.checked ? 'aktif' : 'nonaktif'
-    };
-
-    if (isEditing) {
-      rooms = rooms.map(function (room) {
-        return room.id === updatedRoom.id ? updatedRoom : room;
-      });
-    } else {
-      rooms.push(updatedRoom);
-    }
-
-    renderRows();
-    window.AppModal.hide(roomModal);
-    showNotice('success', isEditing
-      ? 'Perubahan ruang diperbarui sementara di halaman ini; data belum tersimpan ke database.'
-      : 'Ruang ditambahkan sementara di halaman ini; data belum tersimpan ke database.');
   });
 
   deleteForm.addEventListener('submit', function (event) {
-    event.preventDefault();
     if (!deleteId.value || !getRoom(deleteId.value)) {
-      return;
+      event.preventDefault();
     }
-
-    rooms = rooms.filter(function (room) {
-      return room.id !== deleteId.value;
-    });
-    deleteId.value = '';
-    renderRows();
-    window.AppModal.hide(deleteModal);
-    showNotice('success', 'Ruang dihapus dari tampilan sementara; perubahan belum disimpan ke database.');
   });
 
   [nameField, capacityField, locationField].forEach(function (field) {
@@ -367,9 +328,17 @@
   roomModal.addEventListener('modal:hidden', resetForm);
   [roomModal, deleteModal].forEach(function (modal) {
     modal.addEventListener('modal:show', function () {
-      noticeArea.textContent = '';
+      if (!window.reopenRoomModal) {
+        noticeArea.textContent = '';
+      }
     });
   });
 
   renderRows();
+  if (window.reopenRoomModal) {
+    roomTitle.textContent = roomId.value ? 'Ubah Ruang' : 'Tambah Ruang';
+    saveButton.textContent = roomId.value ? 'Simpan Perubahan' : 'Simpan';
+    window.AppModal.show(roomModal, document.getElementById('btn-tambah-ruang'));
+    window.reopenRoomModal = false;
+  }
 })();

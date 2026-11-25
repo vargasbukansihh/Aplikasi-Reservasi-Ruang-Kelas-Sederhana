@@ -1,86 +1,22 @@
 (function () {
   'use strict';
 
-  var reservations = [
-    { id: 1, room: 'Ruang A101', date: '2026-10-22', start: '08:00', end: '10:00', purpose: 'Kuliah pengganti', status: 'Disetujui' },
-    { id: 2, room: 'Lab Komputer 1', date: '2026-10-23', start: '10:00', end: '12:00', purpose: 'Praktikum', status: 'Diajukan' },
-    { id: 3, room: 'Aula Mini', date: '2026-10-25', start: '16:00', end: '18:00', purpose: 'Seminar', status: 'Diajukan' },
-    { id: 4, room: 'Ruang B202', date: '2026-10-26', start: '13:00', end: '15:00', purpose: 'Diskusi kelompok', status: 'Selesai' },
-    { id: 5, room: 'Ruang A102', date: '2026-10-27', start: '09:00', end: '11:00', purpose: 'Rapat himpunan', status: 'Batal' }
-  ];
-
   var tableBody = document.getElementById('tabel-reservasi');
-  var emptyState = document.getElementById('keadaan-kosong-reservasi');
   var form = document.getElementById('form-reservasi');
   var modalForm = document.getElementById('modal-reservasi');
-  var cancelForm = document.getElementById('form-batalkan-reservasi');
   var cancelSummary = document.getElementById('ringkasan-batalkan-reservasi');
+  var cancelIdField = document.getElementById('field-id-batalkan-reservasi');
   var timeError = document.getElementById('err-jam-reservasi');
   var roomField = document.getElementById('field-ruang');
   var dateField = document.getElementById('field-tanggal');
   var startField = document.getElementById('field-jam-mulai');
   var endField = document.getElementById('field-jam-selesai');
   var purposeField = document.getElementById('field-keperluan');
-  var cancelId = null;
 
-  function formatDate(value) {
-    var parts = value.split('-');
-    return parts[2] + '/' + parts[1] + '/' + parts[0];
-  }
-
-  function timeRange(reservation) {
-    return reservation.start + '–' + reservation.end;
-  }
-
-  function statusClass(status) {
-    return {
-      'Diajukan': 'is-pending',
-      'Disetujui': 'is-approved',
-      'Selesai': 'is-finished',
-      'Batal': 'is-cancelled'
-    }[status] || 'is-pending';
-  }
-
-  function makeCell(text) {
-    var cell = document.createElement('td');
-    cell.textContent = text;
-    return cell;
-  }
-
-  function renderReservations() {
-    tableBody.textContent = '';
-    reservations.forEach(function (reservation) {
-      var row = document.createElement('tr');
-      var statusCell = document.createElement('td');
-      var badge = document.createElement('span');
-      var actionCell = document.createElement('td');
-
-      row.appendChild(makeCell(reservation.room));
-      row.appendChild(makeCell(formatDate(reservation.date)));
-      row.appendChild(makeCell(timeRange(reservation)));
-      row.appendChild(makeCell(reservation.purpose));
-
-      badge.className = 'badge-status reservation-status ' + statusClass(reservation.status);
-      badge.textContent = reservation.status;
-      statusCell.appendChild(badge);
-      row.appendChild(statusCell);
-
-      if (reservation.status === 'Diajukan') {
-        var cancelButton = document.createElement('button');
-        cancelButton.type = 'button';
-        cancelButton.className = 'reservation-action';
-        cancelButton.dataset.reservationId = String(reservation.id);
-        cancelButton.textContent = 'Batalkan';
-        cancelButton.setAttribute('aria-label', 'Batalkan reservasi ' + reservation.room +
-          ', tanggal ' + formatDate(reservation.date) + ', pukul ' + timeRange(reservation));
-        actionCell.appendChild(cancelButton);
-      } else {
-        actionCell.textContent = '-';
-      }
-      row.appendChild(actionCell);
-      tableBody.appendChild(row);
-    });
-    emptyState.hidden = reservations.length > 0;
+  function updateStartMinimum() {
+    startField.min = dateField.value === dateField.dataset.today
+      ? dateField.dataset.currentTime
+      : '';
   }
 
   function clearFormValidation() {
@@ -134,6 +70,7 @@
     }
     if (date) {
       dateField.value = date;
+      updateStartMinimum();
     }
     if (time) {
       var times = time.split(/[–-]/);
@@ -148,29 +85,14 @@
   document.getElementById('btn-ajukan-reservasi').addEventListener('click', function () {
     form.reset();
     clearFormValidation();
+    updateStartMinimum();
   });
 
   form.addEventListener('submit', function (event) {
-    event.preventDefault();
     if (!validateReservation()) {
+      event.preventDefault();
       return;
     }
-    reservations.unshift({
-      id: Date.now(),
-      room: roomField.value,
-      date: dateField.value,
-      start: startField.value,
-      end: endField.value,
-      purpose: purposeField.value.trim(),
-      status: 'Diajukan'
-    });
-    renderReservations();
-    form.reset();
-    window.AppModal.hide(modalForm);
-    document.getElementById('area-notifikasi-reservasi').innerHTML =
-      '<div class="alert alert-success alert-feedback" role="status">' +
-      '<i class="fa-solid fa-circle-check me-2" aria-hidden="true"></i>' +
-      'Pengajuan reservasi berhasil ditambahkan.</div>';
   });
 
   [roomField, dateField, startField, endField, purposeField].forEach(function (field) {
@@ -182,6 +104,7 @@
         endField.classList.remove('is-invalid');
       }
     });
+    dateField.addEventListener('change', updateStartMinimum);
     field.addEventListener('change', function () {
       field.classList.remove('is-invalid');
       if (field === startField || field === endField) {
@@ -197,32 +120,13 @@
     if (!button) {
       return;
     }
-    var reservation = reservations.find(function (item) {
-      return String(item.id) === button.dataset.reservationId;
-    });
-    if (!reservation || reservation.status !== 'Diajukan') {
-      return;
-    }
-    cancelId = reservation.id;
-    cancelSummary.textContent = reservation.room + '  ·  ' +
-      formatDate(reservation.date) + ', ' + timeRange(reservation);
+    cancelIdField.value = button.dataset.reservationId;
+    cancelSummary.textContent = button.dataset.room + '  ·  ' +
+      button.dataset.date + ', ' + button.dataset.time;
     window.AppModal.show(
       document.getElementById('modal-batalkan-reservasi'),
       button
     );
-  });
-
-  cancelForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    var reservation = reservations.find(function (item) {
-      return item.id === cancelId;
-    });
-    if (!reservation) {
-      return;
-    }
-    reservation.status = 'Batal';
-    renderReservations();
-    window.AppModal.hide(document.getElementById('modal-batalkan-reservasi'));
   });
 
   modalForm.addEventListener('modal:shown', function () {
@@ -230,8 +134,9 @@
   });
   modalForm.addEventListener('modal:hidden', clearFormValidation);
 
-  renderReservations();
-  if (parseQueryParameters()) {
+  var shouldOpenModal = parseQueryParameters();
+  updateStartMinimum();
+  if (window.reopenReservationModal || shouldOpenModal) {
     window.AppModal.show(modalForm, document.getElementById('btn-ajukan-reservasi'));
   }
 })();

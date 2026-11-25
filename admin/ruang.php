@@ -1,3 +1,70 @@
+<?php
+require_once __DIR__ . '/../db/auth.php';
+requireAdminAccess();
+require_once __DIR__ . '/../db/koneksi.php';
+
+if (!isset($_SESSION['csrf_ruang']) || !is_string($_SESSION['csrf_ruang'])) {
+    $_SESSION['csrf_ruang'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_ruang'];
+$noticeMessage = $_SESSION['ruang_notice'] ?? '';
+$noticeType = $_SESSION['ruang_notice_type'] ?? 'success';
+unset($_SESSION['ruang_notice'], $_SESSION['ruang_notice_type']);
+
+if (!is_string($noticeMessage)) {
+    $noticeMessage = '';
+}
+if (!in_array($noticeType, ['success', 'danger', 'info'], true)) {
+    $noticeType = 'success';
+}
+
+$formValues = [
+    'id' => '',
+    'nama' => '',
+    'kapasitas' => '',
+    'lokasi' => '',
+    'aktif' => true,
+];
+$escapeHtml = static function (string $value): string {
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+};
+
+$storedFormValues = $_SESSION['ruang_form_values'] ?? null;
+$showRoomModal = ($_SESSION['ruang_reopen_modal'] ?? false) === true;
+unset($_SESSION['ruang_form_values'], $_SESSION['ruang_reopen_modal']);
+
+if (is_array($storedFormValues)) {
+    foreach ($formValues as $key => $defaultValue) {
+        if ($key === 'aktif') {
+            if (isset($storedFormValues[$key]) && is_bool($storedFormValues[$key])) {
+                $formValues[$key] = $storedFormValues[$key];
+            }
+        } elseif (isset($storedFormValues[$key]) && is_string($storedFormValues[$key])) {
+            $formValues[$key] = $storedFormValues[$key];
+        }
+    }
+}
+
+$roomRows = $conn->query(
+    'SELECT id_ruang, nama_ruang, lokasi, kapasitas, status_aktif
+     FROM ruang
+     ORDER BY id_ruang DESC'
+)->fetchAll(PDO::FETCH_ASSOC);
+$roomsForJs = array_map(static function (array $room): array {
+    return [
+        'id' => (string) $room['id_ruang'],
+        'nama' => $room['nama_ruang'],
+        'kapasitas' => (int) $room['kapasitas'],
+        'lokasi' => $room['lokasi'],
+        'status' => (int) $room['status_aktif'] === 1 ? 'aktif' : 'nonaktif',
+    ];
+}, $roomRows);
+$roomsJson = json_encode(
+    $roomsForJs,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -52,6 +119,11 @@
               <i class="fa-solid fa-chart-column" aria-hidden="true"></i>Laporan
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../db/logout.php">
+              <i class="fa-solid fa-chart-column" aria-hidden="true"></i>Logout
+            </a>
+          </li>
         </ul>
       </nav>
       <div class="flex-grow-1 sidebar-spacer"></div>
@@ -90,7 +162,15 @@
           </button>
         </div>
 
-        <div id="area-notifikasi-ruang" aria-live="polite"></div>
+        <div id="area-notifikasi-ruang" aria-live="polite">
+          <?php if ($noticeMessage !== ''): ?>
+            <div class="alert alert-<?php echo $escapeHtml($noticeType); ?> alert-feedback alert-dismissible" role="status">
+              <i class="fa-solid fa-circle-<?php echo $noticeType === 'success' ? 'check' : 'exclamation'; ?> me-2" aria-hidden="true"></i>
+              <?php echo $escapeHtml($noticeMessage); ?>
+              <button type="button" class="btn-close" data-alert-dismiss aria-label="Tutup notifikasi"></button>
+            </div>
+          <?php endif; ?>
+        </div>
 
         <section aria-labelledby="judul-cari-ruang">
           <h2 class="visually-hidden" id="judul-cari-ruang">Cari dan filter ruang</h2>
@@ -118,7 +198,7 @@
           <h2 class="visually-hidden" id="judul-daftar-ruang">Daftar ruang</h2>
           <div class="table-responsive">
             <table class="table table-users table-rooms">
-              <caption class="visually-hidden">Daftar contoh ruang untuk pratinjau wireframe.</caption>
+              <caption class="visually-hidden">Daftar ruang yang tersimpan.</caption>
               <thead>
                 <tr>
                   <th scope="col" class="col-no">No</th>
@@ -134,7 +214,7 @@
           </div>
           <div class="empty-state text-center" id="keadaan-kosong-ruang" hidden>
             <i class="fa-solid fa-building-circle-exclamation fa-2x mb-2" aria-hidden="true"></i>
-            <p class="mb-0" id="teks-kosong-ruang">Belum ada data ruang pada pratinjau ini.</p>
+            <p class="mb-0" id="teks-kosong-ruang">Belum ada data ruang.</p>
           </div>
         </section>
 
@@ -152,8 +232,10 @@
   <div class="modal fade" id="modal-ruang" tabindex="-1" aria-labelledby="judul-modal-ruang" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <form id="form-ruang" novalidate>
-          <input type="hidden" name="id" id="field-id-ruang">
+        <form id="form-ruang" method="post"
+              action="<?php echo $formValues['id'] === '' ? '../db/tambah_ruang.php' : '../db/edit_ruang.php'; ?>" novalidate>
+          <input type="hidden" name="csrf_token" value="<?php echo $escapeHtml($csrfToken); ?>">
+          <input type="hidden" name="id" id="field-id-ruang" value="<?php echo $escapeHtml($formValues['id']); ?>">
           <div class="modal-header">
             <h2 class="modal-title" id="judul-modal-ruang">Tambah Ruang</h2>
             <button type="button" class="btn-close" data-modal-dismiss aria-label="Tutup"></button>
@@ -162,23 +244,27 @@
             <div>
               <label for="field-nama-ruang" class="form-label">Nama Ruang <span class="text-danger" aria-hidden="true">*</span></label>
               <input type="text" class="form-control" id="field-nama-ruang" name="nama" required maxlength="100"
+                     value="<?php echo $escapeHtml($formValues['nama']); ?>"
                      placeholder="Contoh: Ruang A101" aria-describedby="err-nama-ruang" autocomplete="off">
               <div class="invalid-feedback" id="err-nama-ruang">Nama ruang wajib diisi.</div>
             </div>
             <div>
               <label for="field-kapasitas" class="form-label">Kapasitas <span class="text-danger" aria-hidden="true">*</span></label>
               <input type="number" class="form-control tabular" id="field-kapasitas" name="kapasitas"
+                     value="<?php echo $escapeHtml($formValues['kapasitas']); ?>"
                      required min="1" step="1" placeholder="Jumlah kursi" aria-describedby="err-kapasitas">
               <div class="invalid-feedback" id="err-kapasitas">Masukkan kapasitas berupa bilangan bulat lebih dari 0.</div>
             </div>
             <div>
               <label for="field-lokasi" class="form-label">Lokasi <span class="text-danger" aria-hidden="true">*</span></label>
               <input type="text" class="form-control" id="field-lokasi" name="lokasi" required maxlength="100"
+                     value="<?php echo $escapeHtml($formValues['lokasi']); ?>"
                      placeholder="Gedung / lantai" aria-describedby="err-lokasi" autocomplete="off">
               <div class="invalid-feedback" id="err-lokasi">Lokasi ruang wajib diisi.</div>
             </div>
             <div class="form-check mb-0">
-              <input class="form-check-input" type="checkbox" id="field-status-aktif" name="aktif" value="1" checked>
+              <input class="form-check-input" type="checkbox" id="field-status-aktif" name="aktif" value="1"
+                     <?php echo $formValues['aktif'] ? 'checked' : ''; ?>>
               <label class="form-check-label" for="field-status-aktif">Status aktif</label>
             </div>
           </div>
@@ -194,7 +280,8 @@
   <div class="modal fade" id="modal-hapus-ruang" tabindex="-1" aria-labelledby="judul-modal-hapus-ruang" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <form id="form-hapus-ruang">
+        <form id="form-hapus-ruang" method="post" action="../db/hapus_ruang.php">
+          <input type="hidden" name="csrf_token" value="<?php echo $escapeHtml($csrfToken); ?>">
           <input type="hidden" name="id" id="hapus-id-ruang">
           <div class="modal-header">
             <h2 class="modal-title" id="judul-modal-hapus-ruang">Hapus Ruang</h2>
@@ -214,6 +301,10 @@
     </div>
   </div>
 
+  <script>
+    window.roomData = <?php echo $roomsJson; ?>;
+    window.reopenRoomModal = <?php echo $showRoomModal ? 'true' : 'false'; ?>;
+  </script>
   <script src="../assets/js/modal.js"></script>
   <script src="../assets/js/ruang.js"></script>
 </body>

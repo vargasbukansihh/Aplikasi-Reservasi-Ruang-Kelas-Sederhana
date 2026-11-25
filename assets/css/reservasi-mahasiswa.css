@@ -72,6 +72,12 @@
   border-color: var(--navy-900);
 }
 
+.reservation-status.is-rejected {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
 .reservation-status.is-finished {
   background: var(--neutral-0);
   color: var(--text-primary);

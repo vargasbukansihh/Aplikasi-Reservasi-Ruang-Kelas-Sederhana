@@ -1,3 +1,12 @@
+<?php
+require_once __DIR__ . '/../db/auth.php';
+requireStudentAccess();
+
+$studentName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
+    ? $_SESSION['nama']
+    : 'Mahasiswa';
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -51,7 +60,7 @@
         </nav>
         <div class="user-chip">
           <span class="avatar avatar-sm" aria-hidden="true"></span>
-          Budi Santoso
+          <?php echo htmlspecialchars($studentName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>
         </div>
       </header>
 

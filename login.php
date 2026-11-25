@@ -1,3 +1,60 @@
+<?php
+session_start();
+require_once 'db/koneksi.php';
+
+$loginError = '';
+$identity = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $identity = $_POST['identitas'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    if (!is_string($identity) || !is_string($password)) {
+        $loginError = 'Username/NIM atau password tidak sesuai.';
+        $identity = '';
+    } else {
+        $identity = trim($identity);
+
+        if ($identity === '' || $password === '') {
+            $loginError = 'Username/NIM atau password tidak sesuai.';
+        } else {
+            $statement = $conn->prepare(
+                'SELECT id_pengguna, nama, password, role
+                 FROM pengguna
+                 WHERE nim = :nim OR username = :username
+                 LIMIT 1'
+            );
+            $statement->execute([
+                'nim' => $identity,
+                'username' => $identity,
+            ]);
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+
+            $destinations = [
+                'admin' => 'admin/dasboard1.php',
+                'mahasiswa' => 'mahasiswa/dasboard.php',
+            ];
+
+            if (
+                $user
+                && password_verify($password, $user['password'])
+                && isset($destinations[$user['role']])
+            ) {
+                session_regenerate_id(true);
+                $_SESSION['id_pengguna'] = $user['id_pengguna'];
+                $_SESSION['nama'] = $user['nama'];
+                $_SESSION['role'] = $user['role'];
+
+                header('Location: ' . $destinations[$user['role']]);
+                exit;
+            }
+
+            $loginError = 'Username/NIM atau password tidak sesuai.';
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -25,15 +82,19 @@
         <p>Gunakan akun Anda untuk mengakses aplikasi.</p>
       </header>
 
-      <div id="pesan-login" class="login-feedback" role="status" aria-live="polite" hidden></div>
+      <div id="pesan-login" class="login-feedback" role="status" aria-live="polite"
+           <?php echo $loginError === '' ? 'hidden' : ''; ?>>
+        <?php echo htmlspecialchars($loginError, ENT_QUOTES, 'UTF-8'); ?>
+      </div>
 
-      <form id="form-login" novalidate>
+      <form id="form-login" method="post" action="login.php" novalidate>
         <div class="login-field">
-          <label for="identitas-login" class="form-label">Email / NIM</label>
+          <label for="identitas-login" class="form-label">Username / NIM</label>
           <input type="text" class="form-control" id="identitas-login" name="identitas"
-                 placeholder="nama@kampus.ac.id atau NIM" autocomplete="username"
+                 placeholder="Username atau NIM" autocomplete="username"
+                 value="<?php echo htmlspecialchars($identity, ENT_QUOTES, 'UTF-8'); ?>"
                  required aria-describedby="err-identitas-login">
-          <div class="invalid-feedback" id="err-identitas-login">Email atau NIM wajib diisi.</div>
+          <div class="invalid-feedback" id="err-identitas-login">Username atau NIM wajib diisi.</div>
         </div>
 
         <div class="login-field">

@@ -9,6 +9,10 @@
   var formCari = document.getElementById('form-cari');
   var inputCari = document.getElementById('cari-kata');
   var selectCariPeran = document.getElementById('cari-peran');
+  var pagination = document.getElementById('pagination-pengguna');
+  var infoHalaman = document.getElementById('info-halaman');
+  var pageSize = 5;
+  var currentPage = 1;
 
   var modalPengguna = document.getElementById('modal-pengguna');
   var formPengguna = document.getElementById('form-pengguna');
@@ -17,11 +21,12 @@
   var fieldId = document.getElementById('field-id');
   var fields = {
     nama: document.getElementById('field-nama'),
-    identitas: document.getElementById('field-identitas'),
-    email: document.getElementById('field-email'),
-    peran: document.getElementById('field-peran')
+    nim: document.getElementById('field-nim'),
+    username: document.getElementById('field-username'),
+    kelas: document.getElementById('field-kelas'),
+    role: document.getElementById('field-role'),
+    password: document.getElementById('field-password')
   };
-  var fieldAktif = document.getElementById('field-aktif');
 
   var modalHapus = document.getElementById('modal-hapus');
   var formHapus = document.getElementById('form-hapus');
@@ -54,40 +59,108 @@
     return Array.prototype.slice.call(tbody.querySelectorAll('tr'));
   }
 
-  function terapkanFilter(umpanBalik) {
+  function renderPagination(pageCount) {
+    pagination.textContent = '';
+    if (pageCount <= 1) {
+      return;
+    }
+
+    function addItem(page, label, disabled, active) {
+      var item = document.createElement('li');
+      var control = document.createElement(disabled || active ? 'span' : 'a');
+      item.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+      control.className = 'page-link';
+      control.textContent = label;
+
+      if (active) {
+        item.setAttribute('aria-current', 'page');
+      } else if (disabled) {
+        control.setAttribute('aria-disabled', 'true');
+        control.setAttribute('aria-label', label === '‹' ? 'Halaman sebelumnya' : 'Halaman berikutnya');
+      } else {
+        control.href = '#';
+        control.dataset.page = String(page);
+        if (label === '‹' || label === '›') {
+          control.setAttribute('aria-label', label === '‹' ? 'Halaman sebelumnya' : 'Halaman berikutnya');
+        }
+      }
+
+      item.appendChild(control);
+      pagination.appendChild(item);
+    }
+
+    addItem(currentPage - 1, '‹', currentPage === 1, false);
+    for (var page = 1; page <= pageCount; page++) {
+      addItem(page, String(page), false, page === currentPage);
+    }
+    addItem(currentPage + 1, '›', currentPage === pageCount, false);
+  }
+
+  function terapkanFilter(umpanBalik, resetPage) {
+    if (resetPage) {
+      currentPage = 1;
+    }
     var kata = inputCari.value.trim().toLowerCase();
     var peran = selectCariPeran.value;
     var semua = baris();
-    var tampil = 0;
+    var cocok = [];
 
     semua.forEach(function (tr) {
       var sel = tr.cells;
       var nama = sel[1].textContent.toLowerCase();
-      var identitas = sel[2].textContent.toLowerCase();
-      var teksPeran = sel[3].textContent.trim();
-      var cocokKata = !kata || nama.indexOf(kata) !== -1 || identitas.indexOf(kata) !== -1;
-      var cocokPeran = !peran || teksPeran === peran;
-      var cocok = cocokKata && cocokPeran;
-      tr.hidden = !cocok;
-      if (cocok) { tampil++; }
+      var nim = sel[2].textContent.toLowerCase();
+      var username = sel[3].textContent.toLowerCase();
+      var cocokKata = !kata || nama.indexOf(kata) !== -1 ||
+        nim.indexOf(kata) !== -1 || username.indexOf(kata) !== -1;
+      var cocokPeran = !peran || tr.dataset.role === peran;
+      if (cocokKata && cocokPeran) {
+        cocok.push(tr);
+      }
     });
 
-    kosong.hidden = tampil > 0;
-    if (tampil === 0) {
+    var pageCount = Math.ceil(cocok.length / pageSize);
+    if (currentPage > pageCount) {
+      currentPage = Math.max(1, pageCount);
+    }
+    var startIndex = (currentPage - 1) * pageSize;
+    var visibleRows = cocok.slice(startIndex, startIndex + pageSize);
+    semua.forEach(function (tr) { tr.hidden = visibleRows.indexOf(tr) === -1; });
+
+    kosong.hidden = cocok.length > 0;
+    if (cocok.length === 0) {
       teksKosong.textContent = semua.length === 0
         ? 'Belum ada data pengguna.'
         : 'Tidak ada pengguna yang cocok dengan pencarian.';
     }
 
     if (umpanBalik && semua.length > 0) {
-      notifikasi(tampil > 0 ? 'info' : 'danger',
-        tampil > 0 ? tampil + ' pengguna ditemukan.' : 'Tidak ada pengguna yang cocok dengan pencarian.');
+      notifikasi(cocok.length > 0 ? 'info' : 'danger',
+        cocok.length > 0 ? cocok.length + ' pengguna ditemukan.' : 'Tidak ada pengguna yang cocok dengan pencarian.');
     }
+
+    infoHalaman.textContent = cocok.length
+      ? 'Menampilkan ' + (startIndex + 1) + '–' + Math.min(startIndex + pageSize, cocok.length) +
+        ' dari ' + cocok.length + ' pengguna'
+      : 'Tidak ada data pengguna untuk ditampilkan.';
+    renderPagination(pageCount);
   }
 
-  formCari.addEventListener('submit', function (e) { e.preventDefault(); terapkanFilter(true); });
-  inputCari.addEventListener('input', function () { terapkanFilter(false); });
-  selectCariPeran.addEventListener('change', function () { terapkanFilter(true); });
+  formCari.addEventListener('submit', function (e) {
+    e.preventDefault();
+    terapkanFilter(true, true);
+  });
+  inputCari.addEventListener('input', function () { terapkanFilter(false, true); });
+  selectCariPeran.addEventListener('change', function () { terapkanFilter(true, true); });
+
+  pagination.addEventListener('click', function (event) {
+    var link = event.target.closest('a[data-page]');
+    if (!link) {
+      return;
+    }
+    event.preventDefault();
+    currentPage = Number(link.dataset.page);
+    terapkanFilter(false, false);
+  });
 
   /* ---------- Validasi form ---------- */
   function setPesan(field, pesan) {
@@ -97,6 +170,10 @@
 
   function bersihkanValidasi() {
     Object.keys(fields).forEach(function (k) { fields[k].classList.remove('is-invalid'); });
+  }
+
+  function sesuaikanNim() {
+    fields.nim.required = fields.role.value === 'mahasiswa';
   }
 
   function validasi() {
@@ -112,25 +189,33 @@
     fields.nama.value = fields.nama.value.trim();
     if (!fields.nama.value) { tandai(fields.nama, 'Nama lengkap wajib diisi.'); }
 
-    fields.identitas.value = fields.identitas.value.trim();
-    if (!fields.identitas.value) { tandai(fields.identitas, 'NIM / ID wajib diisi.'); }
-
-    fields.email.value = fields.email.value.trim();
-    if (!fields.email.value) {
-      tandai(fields.email, 'Email wajib diisi.');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.value)) {
-      tandai(fields.email, 'Format email tidak valid.');
+    fields.nim.value = fields.nim.value.trim();
+    if (fields.role.value === 'mahasiswa' && !fields.nim.value) {
+      tandai(fields.nim, 'NIM wajib diisi untuk mahasiswa.');
     }
 
-    if (!fields.peran.value) { tandai(fields.peran, 'Peran wajib dipilih.'); }
+    fields.username.value = fields.username.value.trim();
+    if (!fields.username.value) { tandai(fields.username, 'Username wajib diisi.'); }
+
+    fields.kelas.value = fields.kelas.value.trim();
+    if (fields.kelas.value.length > 20) { tandai(fields.kelas, 'Kelas maksimal 20 karakter.'); }
+
+    if (!fields.role.value) { tandai(fields.role, 'Peran wajib dipilih.'); }
+
+    if (!fieldId.value && !fields.password.value) {
+      tandai(fields.password, 'Password wajib diisi untuk akun baru.');
+    } else if (
+      fields.password.value
+      && (fields.password.value.length < 8 || fields.password.value.length > 72)
+    ) {
+      tandai(fields.password, 'Password minimal 8 karakter dan maksimal 72 byte.');
+    }
 
     if (pertama) { pertama.focus(); return false; }
     return true;
   }
 
   formPengguna.addEventListener('submit', function (e) {
-    /* Kesalahan ditampilkan inline di dekat field; jika valid, form dikirim
-       apa adanya (method POST) agar diproses backend. */
     if (!validasi()) { e.preventDefault(); }
   });
 
@@ -144,21 +229,27 @@
     judulModal.textContent = 'Tambah Pengguna';
     btnSimpan.textContent = 'Simpan';
     formPengguna.reset();
+    formPengguna.action = '../db/tambah_pengguna.php';
     fieldId.value = '';
-    fieldAktif.checked = true;
+    fields.password.required = true;
+    sesuaikanNim();
     bersihkanValidasi();
   }
 
   function modeUbah(data) {
     judulModal.textContent = 'Ubah Pengguna';
     btnSimpan.textContent = 'Simpan Perubahan';
+    formPengguna.action = '../db/edit_pengguna.php';
     bersihkanValidasi();
     fieldId.value = data.id || '';
     fields.nama.value = data.nama || '';
-    fields.identitas.value = data.identitas || '';
-    fields.email.value = data.email || '';
-    fields.peran.value = data.peran || '';
-    fieldAktif.checked = data.status !== 'nonaktif';
+    fields.nim.value = data.nim || '';
+    fields.username.value = data.username || '';
+    fields.kelas.value = data.kelas || '';
+    fields.role.value = data.role || '';
+    fields.password.value = '';
+    fields.password.required = false;
+    sesuaikanNim();
   }
 
   document.getElementById('btn-tambah').addEventListener('click', modeTambah);
@@ -174,7 +265,7 @@
 
     if (hapus) {
       hapusId.value = hapus.dataset.id || '';
-      hapusRingkasan.textContent = [hapus.dataset.nama, hapus.dataset.identitas, hapus.dataset.peran]
+      hapusRingkasan.textContent = [hapus.dataset.nama, hapus.dataset.nim, hapus.dataset.username, hapus.dataset.role]
         .filter(Boolean).join('  ·  ');
       window.AppModal.show(modalHapus, hapus);
     }
@@ -182,9 +273,12 @@
 
   modalPengguna.addEventListener('modal:shown', function () { fields.nama.focus(); });
 
-  /* Notifikasi lama dibersihkan saat modal dibuka/ditutup agar tidak basi */
   [modalPengguna, modalHapus].forEach(function (m) {
-    m.addEventListener('modal:show', function () { area.textContent = ''; });
+    m.addEventListener('modal:show', function () {
+      if (!window.reopenUserModal) {
+        area.textContent = '';
+      }
+    });
     m.addEventListener('modal:hidden', function () { area.textContent = ''; });
   });
 
@@ -192,6 +286,16 @@
     if (!hapusId.value) { e.preventDefault(); }
   });
 
-  /* Keadaan awal */
-  terapkanFilter(false);
+  fields.role.addEventListener('change', sesuaikanNim);
+
+  terapkanFilter(false, true);
+  if (window.reopenUserModal) {
+    var isEditing = Boolean(fieldId.value);
+    judulModal.textContent = isEditing ? 'Ubah Pengguna' : 'Tambah Pengguna';
+    btnSimpan.textContent = isEditing ? 'Simpan Perubahan' : 'Simpan';
+    fields.password.required = !isEditing;
+    sesuaikanNim();
+    window.AppModal.show(modalPengguna, document.getElementById('btn-tambah'));
+    window.reopenUserModal = false;
+  }
 })();
