@@ -1,0 +1,3 @@
+<Files "smtp_config.php">
+  Require all denied
+</Files>

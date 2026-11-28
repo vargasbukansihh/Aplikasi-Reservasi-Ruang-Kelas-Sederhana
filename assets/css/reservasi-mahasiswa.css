@@ -51,8 +51,7 @@
 
 .reservations-table tbody td:nth-child(2),
 .reservations-table tbody td:nth-child(3),
-.reservations-table tbody td:nth-child(5),
-.reservations-table tbody td:nth-child(6) {
+.reservations-table tbody td:nth-child(5) {
   white-space: nowrap;
 }
 
@@ -90,21 +89,6 @@
   border-color: var(--muted-border);
 }
 
-.reservation-action {
-  padding: 4px 2px;
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.reservation-action:hover {
-  color: var(--action-danger);
-}
-
 .reservation-time-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -121,11 +105,6 @@
   gap: 8px;
   color: var(--text-secondary);
   font-size: 12px;
-}
-
-.reservation-cancel-note {
-  margin: -4px 0 0;
-  color: var(--text-secondary);
 }
 
 #area-notifikasi-reservasi:empty {
@@ -147,8 +126,7 @@
     gap: 14px;
   }
 
-  #modal-reservasi .modal-content,
-  #modal-batalkan-reservasi .modal-content {
+  #modal-reservasi .modal-content {
     padding: 20px;
   }
 }

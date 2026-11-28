@@ -1,10 +1,72 @@
 <?php
 require_once __DIR__ . '/../db/auth.php';
 requireStudentAccess();
+require_once __DIR__ . '/../db/koneksi.php';
 
+$studentId = (int) $_SESSION['id_pengguna'];
 $studentName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
     ? $_SESSION['nama']
     : 'Mahasiswa';
+$escapeHtml = static function (string $value): string {
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+};
+$roomStatistics = $conn->query(
+    'SELECT COUNT(*) AS total,
+            COALESCE(SUM(status_aktif = 1), 0) AS active
+     FROM ruang'
+)->fetch(PDO::FETCH_ASSOC);
+$todayReservationStatement = $conn->prepare(
+    'SELECT COUNT(*) FROM reservasi
+     WHERE id_pengguna = :student_id AND tanggal = CURDATE()'
+);
+$todayReservationStatement->execute(['student_id' => $studentId]);
+$todayReservationCount = (int) $todayReservationStatement->fetchColumn();
+$pendingReservationStatement = $conn->prepare(
+    "SELECT COUNT(*) FROM reservasi
+     WHERE id_pengguna = :student_id AND status = 'diajukan'"
+);
+$pendingReservationStatement->execute(['student_id' => $studentId]);
+$pendingReservationCount = (int) $pendingReservationStatement->fetchColumn();
+$todayReservationsStatement = $conn->prepare(
+    'SELECT r.jam_mulai, r.jam_selesai, r.keperluan, r.status, ru.nama_ruang
+     FROM reservasi r
+     INNER JOIN ruang ru ON ru.id_ruang = r.id_ruang
+     WHERE r.id_pengguna = :student_id AND r.tanggal = CURDATE()
+     ORDER BY r.jam_mulai ASC, r.id_reservasi ASC
+     LIMIT 5'
+);
+$todayReservationsStatement->execute(['student_id' => $studentId]);
+$todayReservations = $todayReservationsStatement->fetchAll(PDO::FETCH_ASSOC);
+$availableRooms = $conn->query(
+    "SELECT ru.nama_ruang, ru.lokasi, ru.kapasitas
+     FROM ruang ru
+     WHERE ru.status_aktif = 1
+       AND NOT EXISTS (
+           SELECT 1
+           FROM reservasi r
+           WHERE r.id_ruang = ru.id_ruang
+             AND r.tanggal = CURDATE()
+             AND r.status = 'disetujui'
+             AND r.jam_mulai <= CURTIME()
+             AND r.jam_selesai > CURTIME()
+       )
+     ORDER BY ru.nama_ruang ASC
+     LIMIT 4"
+)->fetchAll(PDO::FETCH_ASSOC);
+$reservationStatusLabels = [
+    'diajukan' => 'Diajukan',
+    'disetujui' => 'Disetujui',
+    'ditolak' => 'Ditolak',
+    'batal' => 'Batal',
+    'selesai' => 'Selesai',
+];
+$reservationStatusClasses = [
+    'diajukan' => 'is-pending',
+    'disetujui' => 'is-approved',
+    'ditolak' => 'is-rejected',
+    'batal' => 'is-cancelled',
+    'selesai' => 'is-completed',
+];
 ?>
 
 <!DOCTYPE html>
@@ -46,6 +108,11 @@ $studentName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
               <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../db/logout.php">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Keluar
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>
@@ -78,19 +145,19 @@ $studentName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
         <section class="dashboard-stats" aria-label="Ringkasan">
           <article class="card-surface stat-card">
             <h2>Ruang Aktif</h2>
-            <p class="tabular">12</p>
+            <p class="tabular"><?php echo (int) $roomStatistics['active']; ?></p>
           </article>
           <article class="card-surface stat-card">
             <h2>Total Ruang</h2>
-            <p class="tabular">15</p>
+            <p class="tabular"><?php echo (int) $roomStatistics['total']; ?></p>
           </article>
           <article class="card-surface stat-card">
             <h2>Reservasi Hari Ini</h2>
-            <p class="tabular">8</p>
+            <p class="tabular"><?php echo $todayReservationCount; ?></p>
           </article>
           <article class="card-surface stat-card">
             <h2>Menunggu Persetujuan</h2>
-            <p class="tabular">3</p>
+            <p class="tabular"><?php echo $pendingReservationCount; ?></p>
           </article>
         </section>
 
@@ -104,41 +171,27 @@ $studentName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
                   <tr>
                     <th scope="col">Ruang</th>
                     <th scope="col">Jam</th>
-                    <th scope="col">Peminjam</th>
+                    <th scope="col">Keperluan</th>
                     <th scope="col">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Ruang A101</td>
-                    <td class="tabular">08:00–10:00</td>
-                    <td>Budi Santoso</td>
-                    <td><span class="reservation-status is-approved">Disetujui</span></td>
-                  </tr>
-                  <tr>
-                    <td>Lab Komputer 1</td>
-                    <td class="tabular">10:00–12:00</td>
-                    <td>Siti Aminah</td>
-                    <td><span class="reservation-status is-pending">Diajukan</span></td>
-                  </tr>
-                  <tr>
-                    <td>Ruang B202</td>
-                    <td class="tabular">13:00–15:00</td>
-                    <td>Rudi Hartono</td>
-                    <td><span class="reservation-status is-approved">Disetujui</span></td>
-                  </tr>
-                  <tr>
-                    <td>Ruang A103</td>
-                    <td class="tabular">15:00–16:30</td>
-                    <td>Dewi Lestari</td>
-                    <td><span class="reservation-status is-completed">Selesai</span></td>
-                  </tr>
-                  <tr>
-                    <td>Aula Mini</td>
-                    <td class="tabular">16:00–18:00</td>
-                    <td>Andi Pratama</td>
-                    <td><span class="reservation-status is-cancelled">Batal</span></td>
-                  </tr>
+                  <?php foreach ($todayReservations as $reservation): ?>
+                    <?php
+                    $status = (string) $reservation['status'];
+                    $statusLabel = $reservationStatusLabels[$status] ?? $status;
+                    $statusClass = $reservationStatusClasses[$status] ?? 'is-cancelled';
+                    ?>
+                    <tr>
+                      <td><?php echo $escapeHtml((string) $reservation['nama_ruang']); ?></td>
+                      <td class="tabular"><?php echo $escapeHtml(substr((string) $reservation['jam_mulai'], 0, 5) . '–' . substr((string) $reservation['jam_selesai'], 0, 5)); ?></td>
+                      <td><?php echo $escapeHtml((string) $reservation['keperluan']); ?></td>
+                      <td><span class="reservation-status <?php echo $escapeHtml($statusClass); ?>"><?php echo $escapeHtml($statusLabel); ?></span></td>
+                    </tr>
+                  <?php endforeach; ?>
+                  <?php if (!$todayReservations): ?>
+                    <tr><td colspan="4" class="text-center text-secondary-token">Belum ada reservasi hari ini.</td></tr>
+                  <?php endif; ?>
                 </tbody>
               </table>
             </div>
@@ -147,34 +200,18 @@ $studentName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
           <section class="card-surface dashboard-panel available-panel" aria-labelledby="judul-ruang-tersedia">
             <h2 class="dashboard-panel-title" id="judul-ruang-tersedia">Ruang Tersedia Saat Ini</h2>
             <ul class="available-rooms">
-              <li class="available-room">
-                <div>
-                  <h3>Ruang A102</h3>
-                  <p>Gedung A Lt.1 <span aria-hidden="true">|</span> Kap. 35</p>
-                </div>
-                <span class="room-availability">Aktif</span>
-              </li>
-              <li class="available-room">
-                <div>
-                  <h3>Ruang B202</h3>
-                  <p>Gedung B Lt.2 <span aria-hidden="true">|</span> Kap. 50</p>
-                </div>
-                <span class="room-availability">Aktif</span>
-              </li>
-              <li class="available-room">
-                <div>
-                  <h3>Aula Mini</h3>
-                  <p>Gedung C Lt.1 <span aria-hidden="true">|</span> Kap. 120</p>
-                </div>
-                <span class="room-availability">Aktif</span>
-              </li>
-              <li class="available-room">
-                <div>
-                  <h3>Ruang C301</h3>
-                  <p>Gedung C Lt.3 <span aria-hidden="true">|</span> Kap. 25</p>
-                </div>
-                <span class="room-availability">Aktif</span>
-              </li>
+              <?php foreach ($availableRooms as $room): ?>
+                <li class="available-room">
+                  <div>
+                    <h3><?php echo $escapeHtml((string) $room['nama_ruang']); ?></h3>
+                    <p><?php echo $escapeHtml((string) $room['lokasi']); ?> <span aria-hidden="true">|</span> Kap. <?php echo (int) $room['kapasitas']; ?></p>
+                  </div>
+                  <span class="room-availability">Tersedia</span>
+                </li>
+              <?php endforeach; ?>
+              <?php if (!$availableRooms): ?>
+                <li class="text-secondary-token">Tidak ada ruang aktif yang tersedia saat ini.</li>
+              <?php endif; ?>
             </ul>
           </section>
         </div>

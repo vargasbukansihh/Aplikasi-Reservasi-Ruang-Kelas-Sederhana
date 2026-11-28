@@ -1,11 +1,8 @@
 (function () {
   'use strict';
 
-  var tableBody = document.getElementById('tabel-reservasi');
   var form = document.getElementById('form-reservasi');
   var modalForm = document.getElementById('modal-reservasi');
-  var cancelSummary = document.getElementById('ringkasan-batalkan-reservasi');
-  var cancelIdField = document.getElementById('field-id-batalkan-reservasi');
   var timeError = document.getElementById('err-jam-reservasi');
   var roomField = document.getElementById('field-ruang');
   var dateField = document.getElementById('field-tanggal');
@@ -113,20 +110,6 @@
         endField.classList.remove('is-invalid');
       }
     });
-  });
-
-  tableBody.addEventListener('click', function (event) {
-    var button = event.target.closest('button[data-reservation-id]');
-    if (!button) {
-      return;
-    }
-    cancelIdField.value = button.dataset.reservationId;
-    cancelSummary.textContent = button.dataset.room + '  ·  ' +
-      button.dataset.date + ', ' + button.dataset.time;
-    window.AppModal.show(
-      document.getElementById('modal-batalkan-reservasi'),
-      button
-    );
   });
 
   modalForm.addEventListener('modal:shown', function () {

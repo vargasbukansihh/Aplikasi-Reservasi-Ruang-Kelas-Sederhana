@@ -23,6 +23,7 @@ $formValues = [
     'nim' => '',
     'nama' => '',
     'username' => '',
+    'email' => '',
     'kelas' => '',
     'role' => '',
 ];
@@ -42,7 +43,7 @@ if (is_array($storedFormValues)) {
 }
 
 $users = $conn->query(
-    'SELECT id_pengguna, nim, nama, username, kelas, role
+    'SELECT id_pengguna, nim, nama, username, email, kelas, role
      FROM pengguna
      ORDER BY id_pengguna DESC'
 )->fetchAll(PDO::FETCH_ASSOC);
@@ -104,6 +105,11 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
               <i class="fa-solid fa-chart-column" aria-hidden="true"></i>Laporan
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../db/logout.php">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Keluar
+            </a>
+          </li>
         </ul>
       </nav>
       <div class="flex-grow-1 sidebar-spacer"></div>
@@ -162,7 +168,7 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
             <div class="filter-field">
               <label for="cari-kata" class="form-label">Cari Pengguna</label>
               <input type="search" class="form-control" id="cari-kata" name="q"
-                     placeholder="Nama / NIM / username..." autocomplete="off">
+                     placeholder="Nama / NIM / username / email..." autocomplete="off">
             </div>
             <div class="filter-field">
               <label for="cari-peran" class="form-label">Peran</label>
@@ -190,6 +196,7 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
                   <th scope="col">Nama</th>
                   <th scope="col" class="col-id">NIM</th>
                   <th scope="col">Username</th>
+                  <th scope="col">Email</th>
                   <th scope="col">Kelas</th>
                   <th scope="col" class="col-peran">Peran</th>
                   <th scope="col" class="col-aksi">Aksi</th>
@@ -203,6 +210,7 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
                     <td><?php echo $escapeHtml($user['nama']); ?></td>
                     <td class="tabular"><?php echo $escapeHtml($user['nim'] !== '' ? $user['nim'] : '—'); ?></td>
                     <td><?php echo $escapeHtml($user['username']); ?></td>
+                    <td><?php echo $escapeHtml($user['email'] ?? '—'); ?></td>
                     <td><?php echo $escapeHtml($user['kelas'] !== '' ? $user['kelas'] : '—'); ?></td>
                     <td><?php echo $roleLabel; ?></td>
                     <td class="text-nowrap">
@@ -211,6 +219,7 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
                               data-nama="<?php echo $escapeHtml($user['nama']); ?>"
                               data-nim="<?php echo $escapeHtml($user['nim']); ?>"
                               data-username="<?php echo $escapeHtml($user['username']); ?>"
+                              data-email="<?php echo $escapeHtml($user['email'] ?? ''); ?>"
                               data-kelas="<?php echo $escapeHtml($user['kelas']); ?>"
                               data-role="<?php echo $escapeHtml($user['role']); ?>"
                               aria-label="Edit pengguna <?php echo $escapeHtml($user['nama']); ?>">Edit</button>
@@ -277,6 +286,13 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
                      value="<?php echo $escapeHtml($formValues['username']); ?>"
                      placeholder="Username untuk login" aria-describedby="err-username" autocomplete="off">
               <div class="invalid-feedback" id="err-username">Username wajib diisi.</div>
+            </div>
+            <div>
+              <label for="field-email" class="form-label">Email <span class="text-danger" aria-hidden="true">*</span></label>
+              <input type="email" class="form-control" id="field-email" name="email" required maxlength="254"
+                     value="<?php echo $escapeHtml($formValues['email']); ?>"
+                     placeholder="nama@contoh.com" aria-describedby="err-email" autocomplete="email">
+              <div class="invalid-feedback" id="err-email">Masukkan alamat email yang valid.</div>
             </div>
             <div>
               <label for="field-kelas" class="form-label">Kelas</label>

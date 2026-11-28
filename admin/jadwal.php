@@ -126,6 +126,7 @@ $adminName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
           <li class="nav-item"><a class="nav-link" href="reservasi.php"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi</a></li>
           <li class="nav-item"><a class="nav-link active" href="jadwal.php" aria-current="page"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal</a></li>
           <li class="nav-item"><a class="nav-link" href="rekapitulasi.php"><i class="fa-solid fa-chart-column" aria-hidden="true"></i>Laporan</a></li>
+          <li class="nav-item"><a class="nav-link" href="../db/logout.php"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Keluar</a></li>
         </ul>
       </nav>
       <div class="flex-grow-1 sidebar-spacer"></div>

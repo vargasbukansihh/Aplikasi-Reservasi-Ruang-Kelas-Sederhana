@@ -37,41 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!is_string($rawToken) || !hash_equals($csrfToken, $rawToken)) {
         $noticeMessage = 'Permintaan tidak valid. Muat ulang halaman lalu coba kembali.';
-    } elseif (!is_string($action) || !in_array($action, ['create', 'cancel'], true)) {
-        $noticeMessage = 'Aksi reservasi tidak dikenali.';
-    } elseif ($action === 'cancel') {
-        $rawReservationId = $_POST['id_reservasi'] ?? '';
-        $reservationId = is_string($rawReservationId)
-            ? filter_var($rawReservationId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 2147483647]])
-            : false;
-
-        if ($reservationId === false) {
-            $noticeMessage = 'ID reservasi tidak valid.';
-        } else {
-            try {
-                $cancel = $conn->prepare(
-                    "UPDATE reservasi
-                     SET status = 'batal'
-                     WHERE id_reservasi = :id
-                       AND id_pengguna = :student_id
-                       AND status = 'diajukan'"
-                );
-                $cancel->execute([
-                    'id' => $reservationId,
-                    'student_id' => $studentId,
-                ]);
-                if ($cancel->rowCount() === 1) {
-                    $noticeMessage = 'Pengajuan reservasi berhasil dibatalkan.';
-                    $noticeType = 'success';
-                } else {
-                    $noticeMessage = 'Reservasi tidak ditemukan atau tidak dapat dibatalkan.';
-                    $noticeType = 'info';
-                }
-            } catch (PDOException $exception) {
-                error_log('Student reservation cancellation failed: ' . $exception->getMessage());
-                $noticeMessage = 'Reservasi tidak dapat dibatalkan karena terjadi kesalahan database.';
-            }
-        }
+    } elseif (!is_string($action) || $action !== 'create') {
+        $noticeMessage = 'Aksi tidak valid. Mahasiswa hanya dapat mengajukan reservasi.';
     } else {
         $rawRoomId = $_POST['id_ruang'] ?? '';
         $rawDate = $_POST['tanggal'] ?? '';
@@ -267,6 +234,11 @@ $reservationStatusClasses = [
               <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../db/logout.php">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Keluar
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>
@@ -316,7 +288,6 @@ $reservationStatusClasses = [
                   <th scope="col">Jam</th>
                   <th scope="col">Keperluan</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Aksi</th>
                 </tr>
               </thead>
               <tbody id="tabel-reservasi">
@@ -335,19 +306,6 @@ $reservationStatusClasses = [
                     <td class="tabular"><?php echo $escapeHtml($startTime . '–' . $endTime); ?></td>
                     <td><?php echo $escapeHtml((string) $reservation['keperluan']); ?></td>
                     <td><span class="badge-status reservation-status <?php echo $escapeHtml($statusClass); ?>"><?php echo $escapeHtml($statusLabel); ?></span></td>
-                    <td>
-                      <?php if ($status === 'diajukan'): ?>
-                        <button type="button" class="reservation-action" data-reservation-id="<?php echo $escapeHtml((string) $reservation['id_reservasi']); ?>"
-                                data-room="<?php echo $escapeHtml((string) $reservation['nama_ruang']); ?>"
-                                data-date="<?php echo $formattedDate ? $escapeHtml($formattedDate->format('d/m/Y')) : $escapeHtml((string) $reservation['tanggal']); ?>"
-                                data-time="<?php echo $escapeHtml($startTime . '–' . $endTime); ?>"
-                                aria-label="Batalkan reservasi <?php echo $escapeHtml((string) $reservation['nama_ruang']); ?> tanggal <?php echo $formattedDate ? $escapeHtml($formattedDate->format('d/m/Y')) : $escapeHtml((string) $reservation['tanggal']); ?> pukul <?php echo $escapeHtml($startTime . '–' . $endTime); ?>">
-                          Batalkan
-                        </button>
-                      <?php else: ?>
-                        <span class="text-secondary-token">—</span>
-                      <?php endif; ?>
-                    </td>
                   </tr>
                 <?php endforeach; ?>
               </tbody>
@@ -425,32 +383,6 @@ $reservationStatusClasses = [
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-modal-dismiss>Batal</button>
             <button type="submit" class="btn btn-primary">Ajukan Reservasi</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modal-batalkan-reservasi" tabindex="-1"
-       aria-labelledby="judul-modal-batalkan-reservasi" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <form id="form-batalkan-reservasi" method="post" action="reservasi.php">
-          <input type="hidden" name="csrf_token" value="<?php echo $escapeHtml($csrfToken); ?>">
-          <input type="hidden" name="action" value="cancel">
-          <input type="hidden" name="id_reservasi" id="field-id-batalkan-reservasi" value="">
-          <div class="modal-header">
-            <h2 class="modal-title" id="judul-modal-batalkan-reservasi">Batalkan Reservasi</h2>
-            <button type="button" class="btn-close" data-modal-dismiss aria-label="Tutup"></button>
-          </div>
-          <div class="modal-body">
-            <p class="mb-0">Anda yakin ingin membatalkan reservasi berikut?</p>
-            <div class="confirm-box" id="ringkasan-batalkan-reservasi"></div>
-            <p class="reservation-cancel-note">Status reservasi akan berubah menjadi Batal.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-modal-dismiss>Kembali</button>
-            <button type="submit" class="btn btn-primary">Ya, Batalkan</button>
           </div>
         </form>
       </div>

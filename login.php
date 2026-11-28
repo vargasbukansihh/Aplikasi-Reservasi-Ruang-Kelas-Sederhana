@@ -1,8 +1,30 @@
 <?php
 session_start();
-require_once 'db/koneksi.php';
+
+$destinations = [
+    'admin' => 'admin/dasboard1.php',
+    'mahasiswa' => 'mahasiswa/dasboard.php',
+];
+$sessionRole = $_SESSION['role'] ?? null;
+if (
+    isset($_SESSION['id_pengguna'])
+    && is_string($sessionRole)
+    && isset($destinations[$sessionRole])
+) {
+    header('Location: ' . $destinations[$sessionRole]);
+    exit;
+}
+
+require_once __DIR__ . '/db/koneksi.php';
 
 $loginError = '';
+$loginSuccess = $_SESSION['password_reset_success']
+    ?? $_SESSION['registration_success']
+    ?? '';
+unset($_SESSION['registration_success'], $_SESSION['password_reset_success']);
+if (!is_string($loginSuccess)) {
+    $loginSuccess = '';
+}
 $identity = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,25 +43,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $statement = $conn->prepare(
                 'SELECT id_pengguna, nama, password, role
                  FROM pengguna
-                 WHERE nim = :nim OR username = :username
-                 LIMIT 1'
+                 WHERE nim = :nim OR username = :username'
             );
             $statement->execute([
                 'nim' => $identity,
                 'username' => $identity,
             ]);
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            $matchingUsers = $statement->fetchAll(PDO::FETCH_ASSOC);
+            $user = null;
+            foreach ($matchingUsers as $candidate) {
+                if (
+                    isset($destinations[$candidate['role']])
+                    && password_verify($password, (string) $candidate['password'])
+                ) {
+                    $user = $candidate;
+                    break;
+                }
+            }
 
-            $destinations = [
-                'admin' => 'admin/dasboard1.php',
-                'mahasiswa' => 'mahasiswa/dasboard.php',
-            ];
-
-            if (
-                $user
-                && password_verify($password, $user['password'])
-                && isset($destinations[$user['role']])
-            ) {
+            if ($user !== null) {
                 session_regenerate_id(true);
                 $_SESSION['id_pengguna'] = $user['id_pengguna'];
                 $_SESSION['nama'] = $user['nama'];
@@ -83,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </header>
 
       <div id="pesan-login" class="login-feedback" role="status" aria-live="polite"
-           <?php echo $loginError === '' ? 'hidden' : ''; ?>>
-        <?php echo htmlspecialchars($loginError, ENT_QUOTES, 'UTF-8'); ?>
+           <?php echo $loginError === '' && $loginSuccess === '' ? 'hidden' : ''; ?>>
+        <?php echo htmlspecialchars($loginError !== '' ? $loginError : $loginSuccess, ENT_QUOTES, 'UTF-8'); ?>
       </div>
 
       <form id="form-login" method="post" action="login.php" novalidate>
@@ -116,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input class="form-check-input" type="checkbox" id="ingat-saya" name="ingat">
             <label class="form-check-label" for="ingat-saya">Ingat saya</label>
           </div>
-          <button type="button" class="login-text-button" id="lupa-password">Lupa password?</button>
+          <a class="login-text-button" id="lupa-password" href="lupa_password.php">Lupa password?</a>
         </div>
 
         <button type="submit" class="btn btn-primary login-submit">

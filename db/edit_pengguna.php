@@ -42,6 +42,7 @@ $formValues = [
     'nim' => '',
     'nama' => '',
     'username' => '',
+    'email' => '',
     'kelas' => '',
     'role' => '',
 ];
@@ -49,6 +50,7 @@ $rawId = $_POST['id'] ?? '';
 $rawNim = $_POST['nim'] ?? '';
 $rawName = $_POST['nama'] ?? '';
 $rawUsername = $_POST['username'] ?? '';
+$rawEmail = $_POST['email'] ?? '';
 $rawClass = $_POST['kelas'] ?? '';
 $rawRole = $_POST['role'] ?? '';
 $rawPassword = $_POST['password'] ?? '';
@@ -58,6 +60,7 @@ if (
     || !is_string($rawNim)
     || !is_string($rawName)
     || !is_string($rawUsername)
+    || !is_string($rawEmail)
     || !is_string($rawClass)
     || !is_string($rawRole)
     || !is_string($rawPassword)
@@ -70,6 +73,7 @@ $formValues = [
     'nim' => trim($rawNim),
     'nama' => trim($rawName),
     'username' => trim($rawUsername),
+    'email' => trim($rawEmail),
     'kelas' => trim($rawClass),
     'role' => trim($rawRole),
 ];
@@ -98,13 +102,15 @@ if (
     $userId === false
     || !$hasValidTextLength($formValues['nama'], 100)
     || !$hasValidTextLength($formValues['username'], 100)
+    || !$hasValidTextLength($formValues['email'], 254)
+    || filter_var($formValues['email'], FILTER_VALIDATE_EMAIL) === false
     || !$hasValidTextLength($formValues['kelas'], 20, true)
     || !$nimIsValid
     || !in_array($formValues['role'], ['admin', 'mahasiswa'], true)
     || !$passwordIsValid
 ) {
     $redirect(
-        'Periksa nama, username, NIM, kelas, peran, dan password. NIM wajib untuk mahasiswa; password baru minimal 8 karakter dan maksimal 72 byte.',
+        'Periksa nama, username, email, NIM, kelas, peran, dan password. NIM wajib untuk mahasiswa; password baru minimal 8 karakter dan maksimal 72 byte.',
         'danger',
         $formValues,
         true
@@ -149,6 +155,19 @@ try {
         $redirect('Username tersebut sudah digunakan.', 'danger', $formValues, true);
     }
 
+    $duplicateEmail = $conn->prepare(
+        'SELECT 1 FROM pengguna
+         WHERE email = :email AND id_pengguna <> :id
+         LIMIT 1'
+    );
+    $duplicateEmail->execute([
+        'email' => $formValues['email'],
+        'id' => $userId,
+    ]);
+    if ($duplicateEmail->fetchColumn()) {
+        $redirect('Email tersebut sudah digunakan.', 'danger', $formValues, true);
+    }
+
     if ($formValues['nim'] !== '') {
         $duplicateNim = $conn->prepare(
             "SELECT 1 FROM pengguna
@@ -172,7 +191,7 @@ try {
 
         $statement = $conn->prepare(
             'UPDATE pengguna
-             SET nim = :nim, nama = :nama, username = :username,
+             SET nim = :nim, nama = :nama, username = :username, email = :email,
                  password = :password, kelas = :kelas, role = :role
              WHERE id_pengguna = :id'
         );
@@ -180,6 +199,7 @@ try {
             'nim' => $formValues['nim'],
             'nama' => $formValues['nama'],
             'username' => $formValues['username'],
+            'email' => $formValues['email'],
             'password' => $passwordHash,
             'kelas' => $formValues['kelas'],
             'role' => $formValues['role'],
@@ -188,7 +208,7 @@ try {
     } else {
         $statement = $conn->prepare(
             'UPDATE pengguna
-             SET nim = :nim, nama = :nama, username = :username,
+             SET nim = :nim, nama = :nama, username = :username, email = :email,
                  kelas = :kelas, role = :role
              WHERE id_pengguna = :id'
         );
@@ -196,6 +216,7 @@ try {
             'nim' => $formValues['nim'],
             'nama' => $formValues['nama'],
             'username' => $formValues['username'],
+            'email' => $formValues['email'],
             'kelas' => $formValues['kelas'],
             'role' => $formValues['role'],
             'id' => $userId,
@@ -204,7 +225,7 @@ try {
 } catch (PDOException $exception) {
     error_log('User update failed: ' . $exception->getMessage());
     $message = $exception->getCode() === '23000'
-        ? 'Username atau NIM tersebut sudah digunakan.'
+        ? 'Username, email, atau NIM tersebut sudah digunakan.'
         : 'Pengguna tidak dapat diubah karena terjadi kesalahan database.';
     $redirect($message, 'danger', $formValues, true);
 }

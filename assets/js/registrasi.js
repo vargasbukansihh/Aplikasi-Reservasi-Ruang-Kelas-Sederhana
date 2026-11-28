@@ -4,12 +4,23 @@
   var form = document.getElementById('form-registrasi');
   var nameField = document.getElementById('nama-registrasi');
   var nimField = document.getElementById('nim-registrasi');
+  var usernameField = document.getElementById('username-registrasi');
   var emailField = document.getElementById('email-registrasi');
+  var classField = document.getElementById('kelas-registrasi');
   var passwordField = document.getElementById('password-registrasi');
   var confirmField = document.getElementById('konfirmasi-password');
   var termsField = document.getElementById('setuju-ketentuan');
   var message = document.getElementById('pesan-registrasi');
-  var fields = [nameField, nimField, emailField, passwordField, confirmField, termsField];
+  var fields = [
+    nameField,
+    nimField,
+    usernameField,
+    emailField,
+    classField,
+    passwordField,
+    confirmField,
+    termsField
+  ];
 
   function clearInvalid(field) {
     field.classList.remove('is-invalid');
@@ -24,12 +35,11 @@
   });
 
   form.addEventListener('submit', function (event) {
-    event.preventDefault();
-
     var firstInvalid = null;
-    [nameField, nimField, emailField, passwordField, confirmField].forEach(function (field) {
+    [nameField, nimField, usernameField, emailField, classField, passwordField, confirmField].forEach(function (field) {
       var value = field.value.trim();
-      var invalid = !value || !field.validity.valid;
+      var isOptional = field === classField;
+      var invalid = (!isOptional && !value) || (value && !field.validity.valid);
       if (field === confirmField && value && value !== passwordField.value) {
         invalid = true;
       }
@@ -46,10 +56,8 @@
     }
 
     if (firstInvalid) {
+      event.preventDefault();
       firstInvalid.focus();
-      return;
     }
-
-    window.location.href = 'login.php';
   });
 })();

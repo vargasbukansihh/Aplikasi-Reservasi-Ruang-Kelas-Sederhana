@@ -133,6 +133,11 @@ if ($dateFilter !== '') {
               <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Reservasi
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../db/logout.php">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Keluar
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>

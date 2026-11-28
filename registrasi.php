@@ -1,3 +1,56 @@
+<?php
+session_start();
+
+$destinations = [
+    'admin' => 'admin/dasboard1.php',
+    'mahasiswa' => 'mahasiswa/dasboard.php',
+];
+$sessionRole = $_SESSION['role'] ?? null;
+if (
+    isset($_SESSION['id_pengguna'])
+    && is_string($sessionRole)
+    && isset($destinations[$sessionRole])
+) {
+    header('Location: ' . $destinations[$sessionRole]);
+    exit;
+}
+
+if (!isset($_SESSION['csrf_registration']) || !is_string($_SESSION['csrf_registration'])) {
+    $_SESSION['csrf_registration'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_registration'];
+$registrationError = $_SESSION['registration_error'] ?? '';
+$registrationValues = $_SESSION['registration_values'] ?? [];
+unset($_SESSION['registration_error'], $_SESSION['registration_values']);
+
+if (!is_string($registrationError)) {
+    $registrationError = '';
+}
+if (!is_array($registrationValues)) {
+    $registrationValues = [];
+}
+$escapeHtml = static function (string $value): string {
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+};
+$formValues = [
+    'nama' => isset($registrationValues['nama']) && is_string($registrationValues['nama'])
+        ? $registrationValues['nama']
+        : '',
+    'nim' => isset($registrationValues['nim']) && is_string($registrationValues['nim'])
+        ? $registrationValues['nim']
+        : '',
+    'username' => isset($registrationValues['username']) && is_string($registrationValues['username'])
+        ? $registrationValues['username']
+        : '',
+    'email' => isset($registrationValues['email']) && is_string($registrationValues['email'])
+        ? $registrationValues['email']
+        : '',
+    'kelas' => isset($registrationValues['kelas']) && is_string($registrationValues['kelas'])
+        ? $registrationValues['kelas']
+        : '',
+];
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -25,13 +78,18 @@
         <p>Buat akun mahasiswa untuk mengajukan reservasi ruang.</p>
       </header>
 
-      <div id="pesan-registrasi" class="login-feedback" role="status" aria-live="polite" hidden></div>
+      <div id="pesan-registrasi" class="login-feedback" role="alert" aria-live="polite"
+           <?php echo $registrationError === '' ? 'hidden' : ''; ?>>
+        <?php echo $escapeHtml($registrationError); ?>
+      </div>
 
-      <form id="form-registrasi" novalidate>
+      <form id="form-registrasi" method="post" action="db/registrasi_mahasiswa.php" novalidate>
+        <input type="hidden" name="csrf_token" value="<?php echo $escapeHtml($csrfToken); ?>">
         <div class="login-field">
           <label for="nama-registrasi" class="form-label">Nama Lengkap</label>
           <input type="text" class="form-control" id="nama-registrasi" name="nama"
                  placeholder="Nama sesuai KTM" autocomplete="name" required maxlength="100"
+                 value="<?php echo $escapeHtml($formValues['nama']); ?>"
                  aria-describedby="err-nama-registrasi">
           <div class="invalid-feedback" id="err-nama-registrasi">Nama lengkap wajib diisi.</div>
         </div>
@@ -39,23 +97,43 @@
         <div class="login-field">
           <label for="nim-registrasi" class="form-label">NIM</label>
           <input type="text" class="form-control" id="nim-registrasi" name="nim"
-                 placeholder="Nomor induk mahasiswa" autocomplete="username" required maxlength="30"
+                 placeholder="Nomor induk mahasiswa" autocomplete="username" required maxlength="20"
+                 value="<?php echo $escapeHtml($formValues['nim']); ?>"
                  aria-describedby="err-nim-registrasi">
           <div class="invalid-feedback" id="err-nim-registrasi">NIM wajib diisi.</div>
         </div>
 
         <div class="login-field">
+          <label for="username-registrasi" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username-registrasi" name="username"
+                 placeholder="Username untuk login" autocomplete="username" required maxlength="100"
+                 value="<?php echo $escapeHtml($formValues['username']); ?>"
+                 aria-describedby="err-username-registrasi">
+          <div class="invalid-feedback" id="err-username-registrasi">Username wajib diisi.</div>
+        </div>
+
+        <div class="login-field">
           <label for="email-registrasi" class="form-label">Email</label>
           <input type="email" class="form-control" id="email-registrasi" name="email"
-                 placeholder="nama@kampus.ac.id" autocomplete="email" required maxlength="100"
+                 placeholder="nama@contoh.com" autocomplete="email" required maxlength="254"
+                 value="<?php echo $escapeHtml($formValues['email']); ?>"
                  aria-describedby="err-email-registrasi">
           <div class="invalid-feedback" id="err-email-registrasi">Masukkan alamat email yang valid.</div>
         </div>
 
         <div class="login-field">
+          <label for="kelas-registrasi" class="form-label">Kelas <span class="text-secondary">(opsional)</span></label>
+          <input type="text" class="form-control" id="kelas-registrasi" name="kelas"
+                 placeholder="Contoh: TI-2A" maxlength="20"
+                 value="<?php echo $escapeHtml($formValues['kelas']); ?>"
+                 aria-describedby="err-kelas-registrasi">
+          <div class="invalid-feedback" id="err-kelas-registrasi">Kelas maksimal 20 karakter.</div>
+        </div>
+
+        <div class="login-field">
           <label for="password-registrasi" class="form-label">Password</label>
           <input type="password" class="form-control" id="password-registrasi" name="password"
-                 placeholder="Minimal 8 karakter" autocomplete="new-password" required minlength="8"
+                 placeholder="Minimal 8 karakter" autocomplete="new-password" required minlength="8" maxlength="72"
                  aria-describedby="err-password-registrasi">
           <div class="invalid-feedback" id="err-password-registrasi">Password minimal 8 karakter.</div>
         </div>
@@ -69,7 +147,7 @@
         </div>
 
         <div class="register-terms">
-          <input class="form-check-input" type="checkbox" id="setuju-ketentuan" name="setuju" required
+          <input class="form-check-input" type="checkbox" id="setuju-ketentuan" name="setuju" value="1" required
                  aria-describedby="err-ketentuan">
           <label for="setuju-ketentuan">Saya menyetujui ketentuan penggunaan</label>
           <div class="invalid-feedback" id="err-ketentuan">Persetujuan ketentuan penggunaan wajib dicentang.</div>

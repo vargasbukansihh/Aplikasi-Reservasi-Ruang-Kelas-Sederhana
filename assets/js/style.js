@@ -23,6 +23,7 @@
     nama: document.getElementById('field-nama'),
     nim: document.getElementById('field-nim'),
     username: document.getElementById('field-username'),
+    email: document.getElementById('field-email'),
     kelas: document.getElementById('field-kelas'),
     role: document.getElementById('field-role'),
     password: document.getElementById('field-password')
@@ -110,8 +111,10 @@
       var nama = sel[1].textContent.toLowerCase();
       var nim = sel[2].textContent.toLowerCase();
       var username = sel[3].textContent.toLowerCase();
+      var email = sel[4].textContent.toLowerCase();
       var cocokKata = !kata || nama.indexOf(kata) !== -1 ||
-        nim.indexOf(kata) !== -1 || username.indexOf(kata) !== -1;
+        nim.indexOf(kata) !== -1 || username.indexOf(kata) !== -1 ||
+        email.indexOf(kata) !== -1;
       var cocokPeran = !peran || tr.dataset.role === peran;
       if (cocokKata && cocokPeran) {
         cocok.push(tr);
@@ -197,6 +200,11 @@
     fields.username.value = fields.username.value.trim();
     if (!fields.username.value) { tandai(fields.username, 'Username wajib diisi.'); }
 
+    fields.email.value = fields.email.value.trim();
+    if (!fields.email.value || !fields.email.validity.valid) {
+      tandai(fields.email, 'Masukkan alamat email yang valid.');
+    }
+
     fields.kelas.value = fields.kelas.value.trim();
     if (fields.kelas.value.length > 20) { tandai(fields.kelas, 'Kelas maksimal 20 karakter.'); }
 
@@ -245,6 +253,7 @@
     fields.nama.value = data.nama || '';
     fields.nim.value = data.nim || '';
     fields.username.value = data.username || '';
+    fields.email.value = data.email || '';
     fields.kelas.value = data.kelas || '';
     fields.role.value = data.role || '';
     fields.password.value = '';

@@ -50,8 +50,4 @@
     }
   });
 
-  document.getElementById('lupa-password').addEventListener('click', function () {
-    message.textContent = 'Pemulihan password belum tersedia.';
-    message.hidden = false;
-  });
 })();
