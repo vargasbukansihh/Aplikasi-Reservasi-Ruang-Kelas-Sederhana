@@ -14,7 +14,7 @@
   --neutral-700: #4A4A52;
   --neutral-900: #1F1F23;
 
-  --bg-page: var(--neutral-50);
+  --bg-page: #EFE1B5;
   --bg-surface: var(--neutral-0);
   --bg-table-header: var(--neutral-100);
   --bg-nav-active: var(--primary-50);
@@ -82,8 +82,8 @@ a { color: var(--text-link); }
 .app-sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border-default);
+  background: #CDB885;
+  border-right: 1px solid rgba(31, 31, 35, 0.18);
   padding: 16px;
   position: sticky;
   top: 0;
@@ -126,7 +126,7 @@ a { color: var(--text-link); }
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .app-sidebar .nav-link {
@@ -147,14 +147,15 @@ a { color: var(--text-link); }
   color: var(--text-secondary);
 }
 
-.app-sidebar .nav-link:hover { background: var(--bg-table-header); }
+.app-sidebar .nav-link:hover { background: rgba(31, 31, 35, 0.08); }
 
 .app-sidebar .nav-link.active {
-  background: var(--bg-nav-active);
+  background: #6E5034;
+  color: #FFFFFF;
   font-weight: 600;
 }
 
-.app-sidebar .nav-link.active i { color: var(--action-primary); }
+.app-sidebar .nav-link.active i { color: #FFFFFF; }
 
 .sidebar-user {
   display: flex;
@@ -177,7 +178,10 @@ a { color: var(--text-link); }
 
 .avatar-sm { width: 28px; height: 28px; }
 
-.app-main { min-width: 0; }
+.app-main {
+  min-width: 0;
+  background: var(--bg-page);
+}
 
 .app-header {
   display: flex;
@@ -186,8 +190,8 @@ a { color: var(--text-link); }
   gap: 16px;
   height: var(--header-height);
   padding: 0 32px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-default);
+  background: #8A7650;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .breadcrumb {
@@ -197,16 +201,16 @@ a { color: var(--text-link); }
   list-style: none;
   margin: 0;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #FFFFFF;
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
   content: "/";
   padding: 0 8px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.breadcrumb-item a { color: var(--text-secondary); text-decoration: none; }
+.breadcrumb-item a { color: #FFFFFF; text-decoration: none; }
 .breadcrumb-item a:hover { text-decoration: underline; }
 
 .user-chip {
@@ -215,6 +219,7 @@ a { color: var(--text-link); }
   gap: 10px;
   font-size: 13px;
   font-weight: 500;
+  color: #FFFFFF;
 }
 
 .app-content {
@@ -254,9 +259,14 @@ a { color: var(--text-link); }
 
 /* ---------- Kartu, filter, tabel ---------- */
 .card-surface {
-  background: var(--bg-surface);
+  background: #CDB885;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
+}
+
+.app-content table thead th {
+  background: #74512D;
+  color: #FFFFFF;
 }
 
 .filter-card {
@@ -400,6 +410,17 @@ a { color: var(--text-link); }
   border-radius: var(--radius-md);
 }
 
+.app-content .form-control:not([type="checkbox"]):not([type="radio"]),
+.app-content .form-select {
+  color: #FFFFFF;
+  background-color: #74512D;
+  color-scheme: dark;
+}
+
+.app-content .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .form-select { cursor: pointer; }
 .form-control[type="checkbox"],
 .form-check-input {
@@ -476,12 +497,12 @@ a { color: var(--text-link); }
 
 .btn-primary {
   color: var(--neutral-0);
-  background: var(--action-primary);
-  border-color: var(--action-primary);
+  background: #6E5034;
+  border-color: #6E5034;
 }
 
 .btn-primary:hover,
-.btn-primary:active { background: var(--action-primary-hover); border-color: var(--action-primary-hover); }
+.btn-primary:active { background: #553D28; border-color: #553D28; }
 
 .btn-outline-secondary {
   color: var(--text-primary);

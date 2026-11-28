@@ -61,7 +61,7 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <link href="../assets/css/base.css" rel="stylesheet">
-  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" rel="stylesheet">
 </head>
 <body>
   <div class="app-shell d-flex">
@@ -112,15 +112,6 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
           </li>
         </ul>
       </nav>
-      <div class="flex-grow-1 sidebar-spacer"></div>
-      <!-- Identitas pengguna login: nilai contoh dari wireframe, diganti data sesi dari backend -->
-      <div class="sidebar-user">
-        <span class="avatar" aria-hidden="true"></span>
-        <div>
-          <div class="user-name"><?php echo $currentAdminName; ?></div>
-          <div class="user-role">Admin</div>
-        </div>
-      </div>
     </aside>
 
     <div class="app-main flex-grow-1">
@@ -132,7 +123,6 @@ $currentAdminName = $escapeHtml((string) ($_SESSION['nama'] ?? 'Admin'));
           </ol>
         </nav>
         <div class="user-chip">
-          <span class="avatar avatar-sm" aria-hidden="true"></span>
           <?php echo $currentAdminName; ?>
         </div>
       </header>

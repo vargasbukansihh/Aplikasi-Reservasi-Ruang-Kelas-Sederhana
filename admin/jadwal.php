@@ -107,7 +107,7 @@ $adminName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <link href="../assets/css/base.css" rel="stylesheet">
-  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" rel="stylesheet">
   <link href="../assets/css/jadwal-mahasiswa.css" rel="stylesheet">
 </head>
 <body>
@@ -129,14 +129,6 @@ $adminName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
           <li class="nav-item"><a class="nav-link" href="../db/logout.php"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Keluar</a></li>
         </ul>
       </nav>
-      <div class="flex-grow-1 sidebar-spacer"></div>
-      <div class="sidebar-user">
-        <span class="avatar" aria-hidden="true"></span>
-        <div>
-          <div class="user-name"><?php echo $escapeHtml($adminName); ?></div>
-          <div class="user-role">Admin</div>
-        </div>
-      </div>
     </aside>
 
     <div class="app-main flex-grow-1">
@@ -147,7 +139,9 @@ $adminName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
             <li class="breadcrumb-item active" aria-current="page">Jadwal</li>
           </ol>
         </nav>
-        <div class="user-chip"><span class="avatar avatar-sm" aria-hidden="true"></span><?php echo $escapeHtml($adminName); ?></div>
+        <div class="user-chip">
+          <?php echo $escapeHtml($adminName); ?>
+        </div>
       </header>
 
       <main class="app-content schedule-content" id="konten-utama">

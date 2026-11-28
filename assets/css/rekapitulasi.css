@@ -98,7 +98,7 @@
   width: min(100%, 26px);
   min-height: 2px;
   border-radius: 2px 2px 0 0;
-  background: var(--neutral-200);
+  background: #74512D;
 }
 
 .chart-bar-10 { height: 10%; }

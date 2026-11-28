@@ -28,6 +28,9 @@ $formValues = [
 $escapeHtml = static function (string $value): string {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 };
+$adminName = isset($_SESSION['nama']) && is_string($_SESSION['nama'])
+    ? $_SESSION['nama']
+    : 'Admin';
 
 $storedFormValues = $_SESSION['ruang_form_values'] ?? null;
 $showRoomModal = ($_SESSION['ruang_reopen_modal'] ?? false) === true;
@@ -76,7 +79,7 @@ $roomsJson = json_encode(
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <link href="../assets/css/base.css" rel="stylesheet">
-  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" rel="stylesheet">
   <link href="../assets/css/ruang.css" rel="stylesheet">
 </head>
 <body>
@@ -126,14 +129,6 @@ $roomsJson = json_encode(
           </li>
         </ul>
       </nav>
-      <div class="flex-grow-1 sidebar-spacer"></div>
-      <div class="sidebar-user">
-        <span class="avatar" aria-hidden="true"></span>
-        <div>
-          <div class="user-name">Admin Kampus</div>
-          <div class="user-role">Admin</div>
-        </div>
-      </div>
     </aside>
 
     <div class="app-main flex-grow-1">
@@ -145,8 +140,7 @@ $roomsJson = json_encode(
           </ol>
         </nav>
         <div class="user-chip">
-          <span class="avatar avatar-sm" aria-hidden="true"></span>
-          Admin Kampus
+          <?php echo $escapeHtml($adminName); ?>
         </div>
       </header>
 

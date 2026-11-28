@@ -105,7 +105,7 @@ if ($dateFilter !== '') {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <link href="../assets/css/base.css" rel="stylesheet">
-  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" rel="stylesheet">
   <link href="../assets/css/jadwal-mahasiswa.css" rel="stylesheet">
 </head>
 <body>
@@ -151,7 +151,6 @@ if ($dateFilter !== '') {
           </ol>
         </nav>
         <div class="user-chip">
-          <span class="avatar avatar-sm" aria-hidden="true"></span>
           <?php echo $escapeHtml($studentName); ?>
         </div>
       </header>
